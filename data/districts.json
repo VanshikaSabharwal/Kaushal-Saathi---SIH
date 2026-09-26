@@ -1,0 +1,50 @@
+{
+  "_note": "Demo districts. Block coordinates are approximate. Sector demand scores (0-1) are ILLUSTRATIVE placeholders until they are derived from each district's DIPS report, NABARD PLP and NCS openings (plan section A).",
+  "districts": [
+    {
+      "id": "jhansi", "name": "Jhansi", "nameHi": "झाँसी", "state": "Uttar Pradesh", "defaultLanguage": "hi",
+      "blocks": [
+        { "name": "Jhansi City", "nameHi": "झाँसी शहर", "lat": 25.448, "lon": 78.569 },
+        { "name": "Babina", "nameHi": "बबीना", "lat": 25.240, "lon": 78.470 },
+        { "name": "Moth", "nameHi": "मोठ", "lat": 25.720, "lon": 78.950 },
+        { "name": "Mauranipur", "nameHi": "मऊरानीपुर", "lat": 25.240, "lon": 79.130 }
+      ],
+      "demand": {
+        "automotive": 0.8, "electrical": 0.6, "solar": 0.7, "electronics_repair": 0.6, "construction": 0.6,
+        "plumbing": 0.5, "apparel": 0.5, "handicrafts": 0.7, "dairy_livestock": 0.6, "agriculture": 0.5,
+        "food_processing": 0.5, "retail": 0.5, "logistics": 0.5, "beauty": 0.5, "healthcare": 0.5,
+        "furniture": 0.4, "leather": 0.3, "it_ites": 0.3, "hospitality": 0.4
+      }
+    },
+    {
+      "id": "gaya", "name": "Gaya", "nameHi": "गया", "state": "Bihar", "defaultLanguage": "hi",
+      "blocks": [
+        { "name": "Gaya Town", "nameHi": "गया शहर", "lat": 24.791, "lon": 85.000 },
+        { "name": "Bodh Gaya", "nameHi": "बोधगया", "lat": 24.696, "lon": 84.991 },
+        { "name": "Sherghati", "nameHi": "शेरघाटी", "lat": 24.560, "lon": 84.790 },
+        { "name": "Tekari", "nameHi": "टेकारी", "lat": 24.940, "lon": 84.840 }
+      ],
+      "demand": {
+        "hospitality": 0.8, "handicrafts": 0.7, "food_processing": 0.6, "apparel": 0.6, "beauty": 0.6,
+        "agriculture": 0.6, "dairy_livestock": 0.6, "retail": 0.6, "construction": 0.5, "electrical": 0.5,
+        "automotive": 0.5, "electronics_repair": 0.5, "logistics": 0.4, "healthcare": 0.5, "solar": 0.4,
+        "plumbing": 0.4, "furniture": 0.4, "leather": 0.3, "it_ites": 0.3
+      }
+    },
+    {
+      "id": "nashik", "name": "Nashik", "nameHi": "नाशिक", "state": "Maharashtra", "defaultLanguage": "mr",
+      "blocks": [
+        { "name": "Nashik City", "nameHi": "नाशिक शहर", "lat": 19.998, "lon": 73.790 },
+        { "name": "Sinnar", "nameHi": "सिन्नर", "lat": 19.850, "lon": 74.000 },
+        { "name": "Igatpuri", "nameHi": "इगतपुरी", "lat": 19.700, "lon": 73.560 },
+        { "name": "Niphad", "nameHi": "निफाड", "lat": 20.080, "lon": 74.110 }
+      ],
+      "demand": {
+        "agriculture": 0.8, "food_processing": 0.8, "automotive": 0.7, "logistics": 0.7, "electrical": 0.6,
+        "retail": 0.6, "construction": 0.6, "healthcare": 0.6, "electronics_repair": 0.5, "solar": 0.5,
+        "apparel": 0.5, "dairy_livestock": 0.5, "beauty": 0.5, "hospitality": 0.5, "plumbing": 0.5,
+        "it_ites": 0.4, "furniture": 0.4, "handicrafts": 0.3, "leather": 0.3
+      }
+    }
+  ]
+}

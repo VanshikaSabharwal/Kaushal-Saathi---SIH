@@ -1,0 +1,51 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n next,voice -c cyan,magenta \"next dev -p 3000\" \"npm:dev:voice\"",
+    "dev:next": "next dev -p 3000",
+    "dev:voice": "tsx watch voice-server/index.ts",
+    "build": "next build",
+    "start": "next start",
+    "start:voice": "NODE_ENV=production tsx voice-server/index.ts",
+    "lint": "eslint",
+    "verify:audio": "tsx scripts/verify-audio.ts",
+    "verify:tts": "tsx scripts/verify-tts.ts",
+    "verify:wer": "tsx scripts/verify-wer.ts",
+    "verify:eval": "tsx scripts/verify-eval.ts",
+    "call": "tsx scripts/fake-caller.ts",
+    "ingest": "tsx scripts/ingest-docs.ts",
+    "verify:latency": "tsx scripts/verify-latency.ts",
+    "verify:recommender": "tsx scripts/verify-recommender.ts",
+    "verify:interview": "tsx scripts/verify-interview.ts",
+    "verify:records": "tsx scripts/verify-records.ts",
+    "ml:train": "tsx scripts/ml-train.ts",
+    "verify:services": "tsx scripts/verify-services.ts",
+    "ingest:regions": "tsx scripts/ingest-regions.ts",
+    "extract:opportunities": "tsx scripts/extract-opportunities.ts",
+    "seed:users": "tsx scripts/seed-users.ts",
+    "eval:personas": "tsx scripts/eval-personas.ts"
+  },
+  "dependencies": {
+    "mongodb": "^7.6.0",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-icons": "^5.7.0",
+    "tsx": "^4.23.13",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
+    "concurrently": "^9.2.4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

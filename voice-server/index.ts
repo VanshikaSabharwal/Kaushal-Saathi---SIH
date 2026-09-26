@@ -1,0 +1,454 @@
+/**
+ * The voice server.
+ *
+ * A separate process from Next, because a phone call is a long-lived stateful
+ * media stream and Next's route handlers cannot hold a WebSocket — nor can
+ * Vercel, which is where the app itself is headed. Next keeps the UI and the
+ * config; this keeps the audio.
+ *
+ * Two surfaces:
+ *   ws   /ws/call     media, for the browser harness today and Twilio later
+ *   http /internal/*  control plane, called by the Next API routes
+ */
+
+import { loadEnv } from "../lib/env";
+
+// Before anything reads a provider key.
+loadEnv();
+
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { randomUUID } from "node:crypto";
+import { WebSocketServer, type WebSocket } from "ws";
+
+import { BrowserTransport } from "../lib/call/browser-transport";
+import { CallSession, type CallState, type TurnRecord } from "../lib/call/session";
+import * as registry from "../lib/call/registry";
+import { callStats, formatCallStats } from "../lib/call/stats";
+import { warmAll, warmGreeting } from "../lib/agent/warm";
+import * as store from "../lib/store/calls";
+import { getAgentConfig } from "../app/lib/config";
+import { DEFAULT_CONFIG, type AgentConfig } from "../app/lib/types";
+import { PRESETS } from "../app/lib/presets";
+import { ConversationResponder } from "../lib/livelihood/responder";
+import { groqExtractor } from "../lib/livelihood/llm-extract";
+import { groqAnswerer } from "../lib/livelihood/answer";
+import { openConversation } from "../lib/store/conversations";
+import { handleLivelihoodRoute } from "./livelihood-routes";
+import { syncAll } from "../lib/store/sync";
+import { authorised } from "../lib/store/scope";
+import { readToken } from "../lib/auth/session";
+
+/** How often the recommender's live views (registry, cards, outcomes) refresh. */
+const SYNC_EVERY_MS = 10 * 60 * 1000;
+
+/** The agent a call gets when none is named. This app is Kaushal Saathi. */
+const DEFAULT_AGENT_ID = "kaushal-saathi";
+
+/*
+ * PORT is what most hosts (Render, Railway, Fly) inject and expect the process
+ * to bind; VOICE_PORT stays as the local-dev name so `npm run dev` is
+ * unchanged. Host wins when both are set, because refusing the assigned port
+ * is how a deploy silently fails its health check.
+ */
+const PORT = Number(process.env.PORT ?? process.env.VOICE_PORT ?? 3001);
+
+// ---------------------------------------------------------------------------
+// Control plane
+// ---------------------------------------------------------------------------
+
+function json(res: ServerResponse, status: number, body: unknown): void {
+  const payload = JSON.stringify(body);
+
+  res.writeHead(status, {
+    "Content-Type": "application/json",
+    "Content-Length": Buffer.byteLength(payload),
+    // The Next app is a different origin once deployed.
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  });
+
+  res.end(payload);
+}
+
+async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+
+  if (chunks.length === 0) return {};
+
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    return {};
+  }
+}
+
+const server = createServer(async (req, res) => {
+  const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+
+  if (req.method === "OPTIONS") return json(res, 204, {});
+
+  if (url.pathname === "/internal/health") {
+    return json(res, 200, { ok: true, active: registry.activeCount() });
+  }
+
+  // Everything else on the control plane needs the shared token when one is
+  // configured — call transcripts and records are personal data.
+  if (url.pathname.startsWith("/internal/") && !authorised(req)) {
+    return json(res, 401, { error: "Missing or wrong internal token." });
+  }
+
+  if (url.pathname === "/internal/calls" && req.method === "GET") {
+    const id = url.searchParams.get("id");
+
+    if (id) {
+      const call = await store.getCall(id);
+      return call
+        ? json(res, 200, { call })
+        : json(res, 404, { error: "No such call." });
+    }
+
+    const limit = Number(url.searchParams.get("limit") ?? 50);
+    return json(res, 200, { calls: await store.listCalls(limit) });
+  }
+
+  // Place an outbound call: register the intent, to be claimed on connect.
+  if (url.pathname === "/internal/calls/outbound" && req.method === "POST") {
+    const body = await readJson(req);
+
+    const to = typeof body.to === "string" ? body.to : "";
+    const agentId = typeof body.agentId === "string" ? body.agentId : DEFAULT_AGENT_ID;
+    const greeting = typeof body.greeting === "string" ? body.greeting : undefined;
+    const purpose = body.purpose === "followup" ? "followup" : undefined;
+    const beneficiaryId = typeof body.beneficiaryId === "string" ? body.beneficiaryId : undefined;
+
+    if (!to.trim()) {
+      return json(res, 400, { error: "A destination `to` is required." });
+    }
+
+    const config = await resolveConfig(agentId, body.config as AgentConfig | undefined);
+    const id = randomUUID();
+
+    registry.addPending({ id, to, agentId, config, greeting, purpose, beneficiaryId, createdAt: Date.now() });
+
+    return json(res, 200, {
+      call: { id, to, agentId, status: "pending" },
+      // Today the harness answers. With Twilio, this is where the REST call
+      // to /Calls.json would go, and the SID would replace this id.
+      note: "Waiting for the harness to answer. Open the call page.",
+    });
+  }
+
+  if (url.pathname === "/internal/calls/pending" && req.method === "GET") {
+    return json(res, 200, { pending: registry.listPending() });
+  }
+
+  // Beneficiaries, tasks and unknown words live with the voice server, like
+  // call records, so there is one writer whatever the storage backend.
+  if (await handleLivelihoodRoute(req, res, url, { json, readJson })) return;
+
+  json(res, 404, { error: "Not found." });
+});
+
+// ---------------------------------------------------------------------------
+// Media plane
+// ---------------------------------------------------------------------------
+
+const wss = new WebSocketServer({ noServer: true });
+
+server.on("upgrade", (req, socket, head) => {
+  const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+
+  if (url.pathname !== "/ws/call") {
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    void handleCall(ws, url);
+  });
+});
+
+async function resolveConfig(
+  agentId: string,
+  supplied?: AgentConfig,
+): Promise<AgentConfig> {
+  if (supplied) return supplied;
+
+  try {
+    return (await getAgentConfig(agentId)) ?? DEFAULT_CONFIG;
+  } catch {
+    return DEFAULT_CONFIG;
+  }
+}
+
+/**
+ * Per-connection provider overrides, for testing.
+ *
+ * Swapping one leg of the pipeline without editing the saved config makes it
+ * easy to isolate a provider — and to keep working when one of them is rate
+ * limited, which on free tiers happens more than you would like.
+ */
+function applyOverrides(cfg: AgentConfig, url: URL): AgentConfig {
+  const stt = url.searchParams.get("stt");
+  const tts = url.searchParams.get("tts");
+  const llm = url.searchParams.get("llm");
+
+  if (!stt && !tts && !llm) return cfg;
+
+  const next: AgentConfig = {
+    ...cfg,
+    stt: { ...cfg.stt },
+    llm: { ...cfg.llm },
+    tts: { ...cfg.tts },
+  };
+
+  if (stt === "sarvam") {
+    next.stt = { provider: "sarvam", model: "saaras:v3", language: cfg.stt.language };
+  } else if (stt === "gemini") {
+    next.stt = { provider: "gemini", model: "gemini-3.5-transcribe", language: cfg.stt.language };
+  }
+
+  if (tts === "cartesia") {
+    next.tts = { ...cfg.tts, provider: "cartesia", model: "sonic-2", voice: "Sophie" };
+  } else if (tts === "elevenlabs") {
+    next.tts = { ...cfg.tts, provider: "elevenlabs", model: "eleven_flash_v2_5", voice: "Sarah" };
+  }
+
+  if (llm === "groq") {
+    next.llm = { ...cfg.llm, provider: "groq", model: "openai/gpt-oss-20b" };
+  }
+
+  return next;
+}
+
+async function handleCall(ws: WebSocket, url: URL): Promise<void> {
+  // An outbound call already has an agent and a greeting waiting for it; an
+  // inbound one is configured from the query. Everything after this differs
+  // only in those two values.
+  const wanted = url.searchParams.get("callId") ?? undefined;
+  const pending = registry.claimPending(wanted);
+
+  const direction = pending ? "outbound" : "inbound";
+  const agentId = pending?.agentId ?? url.searchParams.get("agentId") ?? DEFAULT_AGENT_ID;
+  const base = pending?.config ?? (await resolveConfig(agentId));
+  const config = applyOverrides(base, url);
+  const id = pending?.id ?? randomUUID();
+
+  // Dev-only network impairment, so buffering bugs surface here rather than
+  // on a real call.
+  const jitterMs = Number(url.searchParams.get("jitter") ?? 0);
+  const loss = Number(url.searchParams.get("loss") ?? 0);
+
+  const transport = new BrowserTransport(id, ws, { jitterMs, loss });
+
+  await store.startCall({
+    id,
+    direction,
+    transport: "browser",
+    agentId,
+    agentName: config.name,
+    to: pending?.to,
+  });
+
+  // The livelihood interview decides its own lines, greeting included; any
+  // other config keeps the LLM agent.
+  let responder: ConversationResponder | undefined;
+  let beneficiaryId: string | undefined;
+
+  if (config.mode === "livelihood") {
+    // A known number continues its own record — resuming an unfinished
+    // interview, or opening the help desk for someone who has a course.
+    // Without one (the browser harness) every call is a new person.
+    // Who is calling: an outbound call knows; a browser call proves it with a
+    // signed ticket. A bare id or number in the URL is never trusted.
+    const ticket = readToken(url.searchParams.get("ticket") ?? undefined);
+
+    const opened = await openConversation({
+      phone: pending?.to,
+      beneficiaryId: pending?.beneficiaryId ?? (ticket?.kind === "call" ? ticket.beneficiaryId : undefined),
+      purpose: pending?.purpose,
+      language: config.language === "mr" ? "mr" : "hi",
+      channelId: id,
+      llm: groqExtractor(),
+      answer: groqAnswerer(),
+    });
+
+    responder = new ConversationResponder(opened.conversation);
+    beneficiaryId = opened.beneficiary.id;
+  }
+
+  const greeting = pending?.greeting ?? responder?.greeting;
+
+  const session = new CallSession({
+    transport,
+    config,
+    direction,
+    greeting,
+    responder,
+    hooks: {
+      onState: (state: CallState) => transport.sendControl({ type: "state", value: state }),
+      onVad: (r) => transport.sendControl({ type: "vad", ...r }),
+      onTurn: (turn: TurnRecord) => {
+        store.addTurn(id, turn);
+        transport.sendControl({
+          type: "transcript",
+          role: turn.role,
+          text: turn.text,
+          interrupted: turn.interrupted,
+          toolsUsed: turn.toolsUsed,
+          sttMs: turn.sttMs,
+          llmMs: turn.llmMs,
+          toolMs: turn.toolMs,
+          ttsMs: turn.ttsMs,
+        });
+      },
+      onError: (message) => {
+        console.error(`[call ${id.slice(0, 8)}] ${message}`);
+        store.failCall(id, message);
+        transport.sendControl({ type: "error", message });
+      },
+      onEnded: () => {
+        registry.unregister(id);
+
+        // Latency is the feature on a phone call, so every call reports how it
+        // actually performed rather than leaving it to be reconstructed from
+        // per-turn lines scattered up the log.
+        void store.endCall(id).then((record) => {
+          const short = id.slice(0, 8);
+
+          if (!record) {
+            console.log(`[call ${short}] ended`);
+            return;
+          }
+
+          const seconds = record.endedAt
+            ? ((record.endedAt - record.startedAt) / 1000).toFixed(1)
+            : "?";
+
+          const stats = callStats(record.turns);
+          const summary = formatCallStats(stats);
+
+          console.log(
+            `[call ${short}] ended after ${seconds}s, ${stats.turns} measured turn(s)`,
+          );
+
+          if (summary) console.log(summary);
+        });
+      },
+    },
+  });
+
+  registry.register(session);
+
+  // Let the harness know which call it answered before any audio flows.
+  transport.sendControl({
+    type: "connected",
+    callId: id,
+    direction,
+    agent: config.name,
+    to: pending?.to,
+    beneficiaryId,
+  });
+
+  // Live tuning from the harness, so endpointing and interruption can be felt
+  // without restarting a call.
+  transport.onParams((patch) => {
+    session.updateParams({
+      endpointingMs:
+        typeof patch.endpointingMs === "number" ? patch.endpointingMs : undefined,
+      silenceTimeout:
+        typeof patch.silenceTimeout === "number" ? patch.silenceTimeout : undefined,
+      interruptionEnabled:
+        typeof patch.interruptionEnabled === "boolean"
+          ? patch.interruptionEnabled
+          : undefined,
+    });
+  });
+
+  console.log(
+    `[call ${id.slice(0, 8)}] ${direction} started — agent "${config.name}"` +
+      ` (stt ${config.stt.provider}, llm ${config.llm.provider}, tts ${config.tts.provider})`,
+  );
+
+  // Catch the case startup warming cannot: a config saved since boot, or an
+  // outbound call carrying its own greeting. On a hit this returns at once, so
+  // the common path costs nothing.
+  await warmGreeting(config, direction, greeting);
+
+  try {
+    await session.start();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to start call.";
+    console.error(`[call ${id.slice(0, 8)}] start failed: ${message}`);
+    store.failCall(id, message);
+    transport.sendControl({ type: "error", message });
+  }
+}
+
+server.listen(PORT, () => {
+  console.log(`voice server listening on :${PORT}`);
+
+  /*
+   * Print the externally reachable URL when the host tells us what it is
+   * (Render sets RENDER_EXTERNAL_URL), otherwise localhost. Logging
+   * "localhost" on a deployed box is actively misleading when you are trying
+   * to work out which URL the browser should be pointed at.
+   */
+  const external = process.env.RENDER_EXTERNAL_URL;
+
+  if (external) {
+    const host = external.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    console.log(`  ws   wss://${host}/ws/call`);
+    console.log(`  http ${external.replace(/\/$/, "")}/internal/health`);
+  } else {
+    console.log(`  ws   ws://localhost:${PORT}/ws/call`);
+    console.log(`  http http://localhost:${PORT}/internal/health`);
+  }
+
+  // The consultant registry, opportunity cards, taught words and placement
+  // rates the recommender reads — now, then on a timer.
+  void syncAll();
+  setInterval(() => void syncAll(), SYNC_EVERY_MS).unref();
+
+  // Generate the greeting and fallback lines now, so the first caller does not
+  // pay for them. Deliberately not awaited: the server must accept calls
+  // immediately, and a warm that is still running simply means an early call
+  // synthesizes its own greeting as it always did.
+  void warmStockLines();
+});
+
+/**
+ * Pre-synthesize the lines every call opens with.
+ *
+ * Failures are counted, not thrown: a provider being down or rate limited at
+ * boot must not stop the server serving calls.
+ */
+async function warmStockLines(): Promise<void> {
+  // Only the agents this deployment actually answers with. The engine's other
+  // presets use other providers and would only burn credits here.
+  // Only the default agent: the speech provider's per-minute limit is small,
+  // and the first real call must not queue behind warm-up requests.
+  const configs: AgentConfig[] = PRESETS.filter((p) => p.id === DEFAULT_AGENT_ID).map((p) => p.config);
+
+  // Whatever an unconfigured call would resolve to, which is usually the one
+  // actually being used during development.
+  try {
+    configs.push(await resolveConfig(DEFAULT_AGENT_ID));
+  } catch {
+    // No saved config; the presets alone are worth warming.
+  }
+
+  const t0 = Date.now();
+  const { warmed, skipped, failed } = await warmAll(configs);
+
+  if (warmed + failed === 0) return;
+
+  console.log(
+    `[warm] ${warmed} line(s) cached in ${((Date.now() - t0) / 1000).toFixed(1)}s` +
+      (skipped ? `, ${skipped} already cached` : "") +
+      (failed ? `, ${failed} failed (will synthesize on demand)` : ""),
+  );
+}

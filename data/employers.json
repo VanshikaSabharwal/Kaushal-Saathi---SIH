@@ -1,0 +1,12 @@
+{
+  "_note": "SAMPLE employers for the placement demo (placeholder names). Replace with real employers from the National Career Service portal and district industry lists.",
+  "employers": [
+    { "id": "e_j1", "name": "Sample Two-Wheeler Dealership – Jhansi", "district": "jhansi", "block": "Jhansi City", "sectors": ["automotive"], "openings": 6, "sample": true },
+    { "id": "e_j2", "name": "Sample Solar Installer – Jhansi", "district": "jhansi", "block": "Babina", "sectors": ["solar", "electrical"], "openings": 4, "sample": true },
+    { "id": "e_j3", "name": "Sample Garment Unit – Jhansi", "district": "jhansi", "block": "Mauranipur", "sectors": ["apparel"], "openings": 10, "sample": true },
+    { "id": "e_g1", "name": "Sample Hotel Group – Bodh Gaya", "district": "gaya", "block": "Bodh Gaya", "sectors": ["hospitality", "food_processing"], "openings": 8, "sample": true },
+    { "id": "e_g2", "name": "Sample Hospital – Gaya", "district": "gaya", "block": "Gaya Town", "sectors": ["healthcare"], "openings": 5, "sample": true },
+    { "id": "e_n1", "name": "Sample Auto Components Plant – Sinnar", "district": "nashik", "block": "Sinnar", "sectors": ["automotive", "logistics"], "openings": 15, "sample": true },
+    { "id": "e_n2", "name": "Sample Food Processing Unit – Niphad", "district": "nashik", "block": "Niphad", "sectors": ["food_processing", "agriculture"], "openings": 12, "sample": true }
+  ]
+}

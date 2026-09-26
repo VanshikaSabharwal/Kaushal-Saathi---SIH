@@ -1,0 +1,27 @@
+{
+  "_note": "Family / current trades: the sector they belong to, the skills a person in that trade usually already has, and the upgrade pathway (course ids, simplest first). A pathway is only used when the person says they want to continue the trade.",
+  "trades": {
+    "cycle_repair": { "hi": "साइकिल मरम्मत", "sector": "automotive", "skills": ["tools_handling", "brake_repair", "tyre_repair", "customer_handling"], "pathway": ["c_2w_service", "c_2w_tech"] },
+    "tailoring": { "hi": "सिलाई", "sector": "apparel", "skills": ["sewing_machine", "stitching", "measurement", "cutting_pattern", "customer_handling"], "pathway": ["c_self_tailor", "c_smo"] },
+    "embroidery": { "hi": "कढ़ाई", "sector": "handicrafts", "skills": ["embroidery", "quality_check"], "pathway": ["c_hand_embroiderer"] },
+    "weaving": { "hi": "बुनाई", "sector": "handicrafts", "skills": ["weaving", "design_basics"], "pathway": ["c_hand_embroiderer"] },
+    "pottery": { "hi": "मिट्टी के बर्तन", "sector": "handicrafts", "skills": ["clay_preparation", "wheel_throwing", "kiln_firing"], "pathway": ["c_terracotta"] },
+    "carpentry": { "hi": "बढ़ईगिरी", "sector": "furniture", "skills": ["wood_cutting", "joinery", "tools_handling", "measurement"], "pathway": ["c_carpenter"] },
+    "leatherwork": { "hi": "चमड़े का काम", "sector": "leather", "skills": ["leather_cutting", "stitching"], "pathway": ["c_leather_goods"] },
+    "masonry": { "hi": "राजमिस्त्री", "sector": "construction", "skills": ["masonry", "measurement", "tools_handling"], "pathway": ["c_mason", "c_plumber"] },
+    "construction_labour": { "hi": "निर्माण मज़दूरी", "sector": "construction", "skills": ["site_safety", "tools_handling"], "pathway": ["c_mason"] },
+    "farming": { "hi": "खेती", "sector": "agriculture", "skills": ["crop_management", "soil_health"], "pathway": ["c_organic_grower", "c_mushroom", "c_micro_irrigation"] },
+    "dairy": { "hi": "पशुपालन / दूध", "sector": "dairy_livestock", "skills": ["animal_care", "fodder_management", "milking_hygiene"], "pathway": ["c_dairy_farmer", "c_goat_farmer"] },
+    "goat_rearing": { "hi": "बकरी पालन", "sector": "dairy_livestock", "skills": ["animal_care", "fodder_management"], "pathway": ["c_goat_farmer", "c_dairy_farmer"] },
+    "barber": { "hi": "नाई का काम", "sector": "beauty", "skills": ["hair_cutting", "hygiene", "customer_handling"], "pathway": ["c_hair_stylist", "c_beauty_asst"] },
+    "electrical_helper": { "hi": "बिजली का काम", "sector": "electrical", "skills": ["electrical_wiring", "tools_handling"], "pathway": ["c_asst_electrician", "c_solar_installer"] },
+    "plumbing_helper": { "hi": "पाइप का काम", "sector": "plumbing", "skills": ["pipe_fitting", "tools_handling"], "pathway": ["c_plumber"] },
+    "mobile_repair": { "hi": "मोबाइल ठीक करना", "sector": "electronics_repair", "skills": ["electronics_basics", "soldering", "customer_handling"], "pathway": ["c_mobile_repair"] },
+    "vending": { "hi": "ठेला / फेरी", "sector": "retail", "skills": ["customer_handling", "billing", "maths_basic"], "pathway": ["c_retail"] },
+    "shopkeeping": { "hi": "दुकान", "sector": "retail", "skills": ["customer_handling", "billing", "stock_keeping", "business_basics", "maths_basic"], "pathway": ["c_retail"] },
+    "cooking": { "hi": "खाना बनाना", "sector": "food_processing", "skills": ["food_hygiene"], "pathway": ["c_pickle", "c_baker"] },
+    "driving": { "hi": "गाड़ी चलाना", "sector": "logistics", "skills": ["two_wheeler_driving", "route_navigation"], "pathway": ["c_delivery"] },
+    "domestic_work": { "hi": "घरेलू काम", "sector": "hospitality", "skills": ["hygiene"], "pathway": [] },
+    "daily_wage": { "hi": "दिहाड़ी मज़दूरी", "sector": null, "skills": ["tools_handling"], "pathway": [] }
+  }
+}

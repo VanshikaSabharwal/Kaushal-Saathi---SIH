@@ -1,0 +1,215 @@
+{
+  "_note": "Sample NSQF-aligned courses for the MVP. Names follow common Skill India / PMKVY / JSS job roles, but NSQF levels, minimum education, durations and income ranges are INDICATIVE — verify each against nqr.gov.in and Skill India Digital Hub before the finale (set verified: true once checked).",
+  "courses": [
+    {
+      "id": "c_2w_service", "name": "Two-Wheeler Service Assistant", "nameHi": "दोपहिया सर्विस सहायक",
+      "sector": "automotive", "nsqfLevel": 3, "minEducation": 8, "durationDays": 90, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["tools_handling", "brake_repair", "tyre_repair", "engine_basics", "auto_electrical", "customer_handling"],
+      "helpfulAssets": ["shop_space", "tools"], "incomeMonthly": [8000, 15000], "verified": false
+    },
+    {
+      "id": "c_2w_tech", "name": "Two-Wheeler Service Technician", "nameHi": "दोपहिया सर्विस तकनीशियन",
+      "sector": "automotive", "nsqfLevel": 4, "minEducation": 10, "durationDays": 120, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["tools_handling", "brake_repair", "engine_basics", "auto_electrical", "diagnostics", "customer_handling"],
+      "helpfulAssets": ["shop_space", "tools"], "incomeMonthly": [10000, 20000], "verified": false
+    },
+    {
+      "id": "c_asst_electrician", "name": "Assistant Electrician", "nameHi": "सहायक इलेक्ट्रीशियन",
+      "sector": "electrical", "nsqfLevel": 3, "minEducation": 8, "durationDays": 90, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["electrical_wiring", "electrical_safety", "tools_handling", "measurement", "customer_handling"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [8000, 15000], "verified": false
+    },
+    {
+      "id": "c_solar_installer", "name": "Solar PV Installer (Suryamitra)", "nameHi": "सोलर पैनल इंस्टॉलर (सूर्यमित्र)",
+      "sector": "solar", "nsqfLevel": 4, "minEducation": 10, "durationDays": 90, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": true, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["electrical_wiring", "solar_installation", "electrical_safety", "measurement", "tools_handling"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [10000, 18000], "verified": false
+    },
+    {
+      "id": "c_cctv_tech", "name": "CCTV Installation Technician", "nameHi": "सीसीटीवी लगाने वाले तकनीशियन",
+      "sector": "electronics_repair", "nsqfLevel": 4, "minEducation": 10, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["electronics_basics", "electrical_wiring", "tools_handling", "customer_handling", "computer_basics"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [9000, 16000], "verified": false
+    },
+    {
+      "id": "c_mobile_repair", "name": "Mobile Phone Hardware Repair Technician", "nameHi": "मोबाइल रिपेयर तकनीशियन",
+      "sector": "electronics_repair", "nsqfLevel": 4, "minEducation": 10, "durationDays": 90, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["electronics_basics", "soldering", "diagnostics", "tools_handling", "customer_handling"],
+      "helpfulAssets": ["shop_space", "tools"], "incomeMonthly": [8000, 18000], "verified": false
+    },
+    {
+      "id": "c_plumber", "name": "Plumber (General)", "nameHi": "प्लंबर",
+      "sector": "plumbing", "nsqfLevel": 3, "minEducation": 5, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": true, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["pipe_fitting", "tools_handling", "measurement", "customer_handling"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [8000, 15000], "verified": false
+    },
+    {
+      "id": "c_mason", "name": "Assistant Mason", "nameHi": "सहायक राजमिस्त्री",
+      "sector": "construction", "nsqfLevel": 3, "minEducation": 0, "durationDays": 60, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": true, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["masonry", "measurement", "tools_handling", "site_safety"],
+      "helpfulAssets": [], "incomeMonthly": [9000, 15000], "verified": false
+    },
+    {
+      "id": "c_carpenter", "name": "Assistant Carpenter – Wooden Furniture", "nameHi": "सहायक बढ़ई – लकड़ी का फ़र्नीचर",
+      "sector": "furniture", "nsqfLevel": 3, "minEducation": 5, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": true, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["wood_cutting", "joinery", "tools_handling", "measurement"],
+      "helpfulAssets": ["tools", "shop_space"], "incomeMonthly": [8000, 16000], "verified": false
+    },
+    {
+      "id": "c_smo", "name": "Sewing Machine Operator", "nameHi": "सिलाई मशीन ऑपरेटर",
+      "sector": "apparel", "nsqfLevel": 4, "minEducation": 5, "durationDays": 60, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["sewing_machine", "stitching", "measurement", "quality_check"],
+      "helpfulAssets": [], "incomeMonthly": [8000, 12000], "verified": false
+    },
+    {
+      "id": "c_self_tailor", "name": "Self-Employed Tailor", "nameHi": "स्वरोज़गार दर्ज़ी",
+      "sector": "apparel", "nsqfLevel": 4, "minEducation": 5, "durationDays": 90, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["sewing_machine", "cutting_pattern", "stitching", "measurement", "customer_handling"],
+      "helpfulAssets": ["tools", "shop_space"], "incomeMonthly": [5000, 12000], "verified": false
+    },
+    {
+      "id": "c_hand_embroiderer", "name": "Hand Embroiderer", "nameHi": "हाथ की कढ़ाई कारीगर",
+      "sector": "handicrafts", "nsqfLevel": 3, "minEducation": 0, "durationDays": 60, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["embroidery", "design_basics", "quality_check"],
+      "helpfulAssets": [], "incomeMonthly": [4000, 9000], "verified": false
+    },
+    {
+      "id": "c_terracotta", "name": "Terracotta and Pottery Artisan", "nameHi": "टेराकोटा और मिट्टी के बर्तन कारीगर",
+      "sector": "handicrafts", "nsqfLevel": 3, "minEducation": 0, "durationDays": 60, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["clay_preparation", "wheel_throwing", "kiln_firing", "design_basics", "business_basics"],
+      "helpfulAssets": ["tools", "land"], "incomeMonthly": [5000, 12000], "verified": false
+    },
+    {
+      "id": "c_leather_goods", "name": "Leather Goods Stitching Operator", "nameHi": "चमड़े के सामान की सिलाई",
+      "sector": "leather", "nsqfLevel": 4, "minEducation": 5, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["leather_cutting", "stitching", "sewing_machine", "quality_check"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [8000, 14000], "verified": false
+    },
+    {
+      "id": "c_beauty_asst", "name": "Assistant Beauty Therapist", "nameHi": "सहायक ब्यूटी थेरेपिस्ट",
+      "sector": "beauty", "nsqfLevel": 3, "minEducation": 8, "durationDays": 60, "mode": "part_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["skin_care", "hair_care", "hygiene", "customer_handling"],
+      "helpfulAssets": ["shop_space"], "incomeMonthly": [6000, 14000], "verified": false
+    },
+    {
+      "id": "c_hair_stylist", "name": "Assistant Hair Stylist", "nameHi": "सहायक हेयर स्टाइलिस्ट",
+      "sector": "beauty", "nsqfLevel": 3, "minEducation": 8, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": true,
+      "requiredSkills": ["hair_cutting", "hair_care", "hygiene", "customer_handling"],
+      "helpfulAssets": ["shop_space", "tools"], "incomeMonthly": [7000, 15000], "verified": false
+    },
+    {
+      "id": "c_dairy_farmer", "name": "Dairy Farmer / Entrepreneur", "nameHi": "डेयरी किसान / उद्यमी",
+      "sector": "dairy_livestock", "nsqfLevel": 4, "minEducation": 5, "durationDays": 45, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": true, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["animal_care", "fodder_management", "milking_hygiene", "record_keeping", "business_basics"],
+      "helpfulAssets": ["livestock", "land"], "incomeMonthly": [6000, 15000], "verified": false
+    },
+    {
+      "id": "c_goat_farmer", "name": "Small Ruminant (Goat) Farmer", "nameHi": "बकरी पालन",
+      "sector": "dairy_livestock", "nsqfLevel": 3, "minEducation": 0, "durationDays": 30, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["animal_care", "animal_health_basic", "fodder_management", "record_keeping"],
+      "helpfulAssets": ["livestock", "land"], "incomeMonthly": [4000, 10000], "verified": false
+    },
+    {
+      "id": "c_poultry", "name": "Small Poultry Farmer", "nameHi": "छोटा मुर्गी पालन",
+      "sector": "dairy_livestock", "nsqfLevel": 3, "minEducation": 5, "durationDays": 30, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": false,
+      "requiredSkills": ["poultry_care", "animal_health_basic", "record_keeping", "business_basics"],
+      "helpfulAssets": ["land", "savings"], "incomeMonthly": [4000, 10000], "verified": false
+    },
+    {
+      "id": "c_organic_grower", "name": "Organic Grower", "nameHi": "जैविक खेती",
+      "sector": "agriculture", "nsqfLevel": 4, "minEducation": 5, "durationDays": 45, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": true, "homeBased": true, "rplAvailable": true,
+      "requiredSkills": ["crop_management", "soil_health", "organic_inputs", "record_keeping"],
+      "helpfulAssets": ["land"], "incomeMonthly": [5000, 12000], "verified": false
+    },
+    {
+      "id": "c_mushroom", "name": "Mushroom Grower", "nameHi": "मशरूम उत्पादक",
+      "sector": "agriculture", "nsqfLevel": 4, "minEducation": 5, "durationDays": 30, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": false,
+      "requiredSkills": ["mushroom_cultivation", "hygiene", "record_keeping", "business_basics"],
+      "helpfulAssets": ["savings"], "incomeMonthly": [4000, 10000], "verified": false
+    },
+    {
+      "id": "c_micro_irrigation", "name": "Micro Irrigation Technician", "nameHi": "सूक्ष्म सिंचाई तकनीशियन",
+      "sector": "agriculture", "nsqfLevel": 4, "minEducation": 10, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": true, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["pipe_fitting", "crop_management", "measurement", "customer_handling"],
+      "helpfulAssets": ["tools"], "incomeMonthly": [8000, 14000], "verified": false
+    },
+    {
+      "id": "c_pickle", "name": "Pickle Making Technician", "nameHi": "अचार बनाने का काम",
+      "sector": "food_processing", "nsqfLevel": 3, "minEducation": 5, "durationDays": 30, "mode": "part_time",
+      "outcome": "self", "physicallyDemanding": false, "homeBased": true, "rplAvailable": false,
+      "requiredSkills": ["food_hygiene", "food_preservation", "packaging", "business_basics"],
+      "helpfulAssets": ["savings"], "incomeMonthly": [3000, 9000], "verified": false
+    },
+    {
+      "id": "c_baker", "name": "Craft Baker", "nameHi": "बेकरी कारीगर",
+      "sector": "food_processing", "nsqfLevel": 4, "minEducation": 8, "durationDays": 60, "mode": "full_time",
+      "outcome": "both", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["baking", "food_hygiene", "measurement", "packaging"],
+      "helpfulAssets": ["shop_space"], "incomeMonthly": [7000, 14000], "verified": false
+    },
+    {
+      "id": "c_retail", "name": "Retail Sales Associate", "nameHi": "दुकान बिक्री सहायक",
+      "sector": "retail", "nsqfLevel": 4, "minEducation": 10, "durationDays": 60, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["customer_handling", "billing", "digital_payments", "stock_keeping"],
+      "helpfulAssets": [], "incomeMonthly": [8000, 13000], "verified": false
+    },
+    {
+      "id": "c_delivery", "name": "Last-Mile Delivery Associate", "nameHi": "डिलीवरी सहायक",
+      "sector": "logistics", "nsqfLevel": 3, "minEducation": 8, "durationDays": 30, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["two_wheeler_driving", "route_navigation", "digital_payments", "customer_handling"],
+      "helpfulAssets": [], "incomeMonthly": [10000, 16000], "verified": false
+    },
+    {
+      "id": "c_warehouse", "name": "Warehouse Packer", "nameHi": "गोदाम पैकर",
+      "sector": "logistics", "nsqfLevel": 3, "minEducation": 5, "durationDays": 30, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": true, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["packaging", "stock_keeping", "workplace_safety"],
+      "helpfulAssets": [], "incomeMonthly": [8000, 12000], "verified": false
+    },
+    {
+      "id": "c_gda", "name": "General Duty Assistant", "nameHi": "जनरल ड्यूटी असिस्टेंट (अस्पताल)",
+      "sector": "healthcare", "nsqfLevel": 4, "minEducation": 10, "durationDays": 90, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": true, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["patient_care", "hygiene", "first_aid", "communication"],
+      "helpfulAssets": [], "incomeMonthly": [9000, 15000], "verified": false
+    },
+    {
+      "id": "c_data_entry", "name": "Domestic Data Entry Operator", "nameHi": "डेटा एंट्री ऑपरेटर",
+      "sector": "it_ites", "nsqfLevel": 4, "minEducation": 12, "durationDays": 60, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["computer_basics", "typing", "reading_basic", "communication"],
+      "helpfulAssets": [], "incomeMonthly": [9000, 14000], "verified": false
+    },
+    {
+      "id": "c_fnb_steward", "name": "Food and Beverage Service Steward", "nameHi": "होटल सर्विस स्टाफ़",
+      "sector": "hospitality", "nsqfLevel": 4, "minEducation": 10, "durationDays": 60, "mode": "full_time",
+      "outcome": "wage", "physicallyDemanding": false, "homeBased": false, "rplAvailable": false,
+      "requiredSkills": ["customer_handling", "food_hygiene", "communication", "hygiene"],
+      "helpfulAssets": [], "incomeMonthly": [9000, 15000], "verified": false
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+# Render blueprint for the voice server.
+#
+# Only the voice server lives here. The Next app is deployed separately
+# (Vercel or another Render service) — see voice-server/index.ts:4-7 for why
+# they are split: a call is a long-lived WebSocket, which Next route handlers
+# and Vercel functions cannot hold.
+#
+# Deploy: Render dashboard -> New -> Blueprint -> point at this repo.
+# Then set the secret env vars below in the dashboard (they are marked
+# sync:false so they are never committed).
+
+services:
+  - type: web
+    name: voice-server
+    runtime: node
+    plan: starter # free tier idles after ~15 min; see note at the bottom
+    region: singapore # closest to Indian callers; providers are still cross-region
+
+    # `npm ci` needs the lockfile in sync with package.json.
+    # `npm run ingest` regenerates .data/vectors.json from the tracked docs/
+    # directory, because .data/ is gitignored and therefore absent on a fresh
+    # checkout. Without it search_policies answers "no documents ingested".
+    buildCommand: npm ci && npm run ingest
+    startCommand: npm run start:voice
+
+    # Render probes this to decide the deploy succeeded and to restart a
+    # wedged instance. Already implemented at voice-server/index.ts:71-73.
+    healthCheckPath: /internal/health
+
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+
+      # PORT is injected by Render and read first (voice-server/index.ts:31).
+      # Do not set it here.
+
+      # Persistence. Without this the container's filesystem is used, which is
+      # ephemeral — saved configs and call history vanish on every deploy, and
+      # the voice server falls back to DEFAULT_CONFIG.
+      - key: MONGODB_URL
+        sync: false
+
+      # Provider keys. sync:false = set by hand in the dashboard, never in git.
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: CARTESIA_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: BODHAN_STT_API_KEY
+        sync: false
+      - key: BODHAN_TTS_API_KEY
+        sync: false
+
+# Two caveats worth knowing before this carries real calls:
+#
+# 1. Free/starter instances sleep when idle. A cold start takes tens of
+#    seconds, which a caller experiences as a dead line. Use a paid instance
+#    for anything real.
+#
+# 2. Set MONGODB_URL. Configs and call history fall back to the container's
+#    ephemeral disk without it, which means Settings appears to save and then
+#    loses the edit on the next deploy. RAG vectors are fine either way — they
+#    are rebuilt by `npm run ingest` in the build command above.

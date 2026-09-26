@@ -1,0 +1,223 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fc;
+  --foreground: #1e2139;
+
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --border: #e8eaf2;
+  --border-strong: #d8dbe8;
+
+  --brand: #6d5ef8;
+  --brand-hover: #5c4de6;
+  --brand-soft: #efedff;
+
+  --text-muted: #6b7194;
+  --text-subtle: #9aa0bd;
+
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #e5484d;
+  --danger-soft: #fee9ea;
+
+  /* Kaushal Saathi: trustworthy indigo, warm marigold, soft paper background. */
+  --ks-primary: #2e3a8c;
+  --ks-primary-soft: #e8eaf8;
+  --ks-accent: #f59e0b;
+  --ks-accent-soft: #fef3c7;
+  --ks-paper: #faf8f4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Form controls share one visual language across every settings tab. */
+@layer components {
+  .field-label {
+    @apply block text-xs font-medium text-[var(--text-muted)] mb-1.5;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm
+           text-[var(--foreground)] outline-none transition
+           placeholder:text-[var(--text-subtle)]
+           focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/15;
+  }
+
+  /* Tailwind v4 cannot @apply another custom component class, so the shared
+     input declarations are repeated here rather than composed from .field-input. */
+  .field-select {
+    @apply w-full appearance-none rounded-lg border border-[var(--border)] bg-white
+           bg-no-repeat py-2 pl-3 pr-9 text-sm text-[var(--foreground)] outline-none transition
+           focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/15;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7194' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.65rem center;
+    background-size: 1rem;
+  }
+
+  .card {
+    @apply rounded-xl border border-[var(--border)] bg-white p-4 sm:p-5;
+  }
+
+  .chip-connected {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-[var(--success-soft)]
+           px-2.5 py-1 text-[11px] font-medium text-[var(--success)];
+  }
+
+  /* Utilities repeated in full for each chip: Tailwind v4 cannot @apply one
+     custom component class inside another. */
+  .chip-warning {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-[var(--warning-soft)]
+           px-2.5 py-1 text-[11px] font-medium text-[var(--warning)];
+  }
+
+  .chip-error {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-[var(--danger-soft)]
+           px-2.5 py-1 text-[11px] font-medium text-[var(--danger)];
+  }
+
+  .chip-neutral {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-muted)]
+           px-2.5 py-1 text-[11px] font-medium text-[var(--text-subtle)];
+  }
+}
+
+/* Range inputs need explicit cross-browser styling to match the mockup. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--brand);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--brand);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+@keyframes bar-pulse {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.animate-bar {
+  animation: bar-pulse 1s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/*
+ * Translating the page (app/lib/dom-translate.ts). Text still waiting for its
+ * translation is drawn as a pulsing skeleton bar: the glyphs are hidden and a
+ * thick underline sits across the line, so the bars follow the real text,
+ * line wraps and all. html[data-ks-boot] does this for the whole page body
+ * before the app starts (script in app/lib/shells.ts); after that, only the
+ * elements marked [data-ks-pending]. When the translations arrive, the lines
+ * fade in from the top of the screen down ([data-ks-in]).
+ */
+@property --ks-skel {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e3e6f0;
+}
+
+/* One animation on the root; every bar inherits the colour, so all of them pulse in step. */
+html[data-ks-boot],
+html[data-ks-skeleton] {
+  animation: ks-skel-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes ks-skel-pulse {
+  from { --ks-skel: #e3e6f0; }
+  to { --ks-skel: #f1f2f8; }
+}
+
+:is(html[data-ks-boot] main, html[data-ks-boot] main *, [data-ks-pending], [data-ks-pending] *):not(input, select, textarea) {
+  -webkit-text-fill-color: transparent;
+  text-decoration-line: underline;
+  text-decoration-color: var(--ks-skel);
+  text-decoration-thickness: 0.8em;
+  text-underline-offset: -0.7em;
+  text-decoration-skip-ink: none;
+  cursor: progress;
+}
+
+/* Numbers, codes and the like are never translated, so there is nothing to wait for. */
+:is(html[data-ks-boot] main, [data-ks-pending]) [translate="no"],
+:is(html[data-ks-boot] main, [data-ks-pending]) [translate="no"] * {
+  -webkit-text-fill-color: currentColor;
+  text-decoration-line: none;
+}
+
+[data-ks-in] {
+  animation: ks-in 0.4s ease-out both;
+}
+
+@keyframes ks-in {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    translate: 0 0.3em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ks-boot],
+  html[data-ks-skeleton] {
+    animation: none;
+  }
+}
+
+/* Beneficiary screens: large type and touch targets for low-literacy users. */
+.ks-body {
+  font-family: var(--font-deva), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 18px;
+  background: var(--ks-paper);
+}

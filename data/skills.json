@@ -1,0 +1,75 @@
+{
+  "_note": "Skill vocabulary used by courses, trades and the skill-gap report. Tags are simplified from NSQF qualification-pack NOS units.",
+  "skills": {
+    "reading_basic": { "hi": "पढ़ना-लिखना", "en": "basic reading and writing", "foundation": true },
+    "maths_basic": { "hi": "हिसाब-किताब", "en": "basic maths", "foundation": true },
+    "digital_payments": { "hi": "मोबाइल से पैसे का लेन-देन", "en": "digital payments", "foundation": true },
+    "business_basics": { "hi": "अपना काम चलाना", "en": "running a small business", "foundation": true },
+
+    "tools_handling": { "hi": "औज़ार चलाना", "en": "using hand tools" },
+    "measurement": { "hi": "नाप-जोख", "en": "measuring" },
+    "customer_handling": { "hi": "ग्राहक से बात", "en": "dealing with customers" },
+    "communication": { "hi": "बातचीत", "en": "communication" },
+    "hygiene": { "hi": "साफ़-सफ़ाई", "en": "hygiene" },
+    "quality_check": { "hi": "काम की जाँच", "en": "quality checking" },
+    "record_keeping": { "hi": "रिकॉर्ड रखना", "en": "record keeping" },
+    "workplace_safety": { "hi": "काम पर सुरक्षा", "en": "workplace safety" },
+    "design_basics": { "hi": "डिज़ाइन की समझ", "en": "design basics" },
+
+    "brake_repair": { "hi": "ब्रेक ठीक करना", "en": "brake repair" },
+    "tyre_repair": { "hi": "टायर-पंक्चर", "en": "tyre and puncture repair" },
+    "engine_basics": { "hi": "इंजन का काम", "en": "engine work" },
+    "auto_electrical": { "hi": "गाड़ी की बिजली", "en": "vehicle electricals" },
+    "diagnostics": { "hi": "खराबी पहचानना", "en": "fault finding" },
+
+    "electrical_wiring": { "hi": "बिजली की वायरिंग", "en": "electrical wiring" },
+    "electrical_safety": { "hi": "बिजली में सुरक्षा", "en": "electrical safety" },
+    "solar_installation": { "hi": "सोलर पैनल लगाना", "en": "solar panel installation" },
+    "electronics_basics": { "hi": "इलेक्ट्रॉनिक्स की समझ", "en": "electronics basics" },
+    "soldering": { "hi": "सोल्डरिंग", "en": "soldering" },
+
+    "pipe_fitting": { "hi": "पाइप फिटिंग", "en": "pipe fitting" },
+    "masonry": { "hi": "चिनाई", "en": "masonry" },
+    "site_safety": { "hi": "साइट पर सुरक्षा", "en": "construction site safety" },
+    "wood_cutting": { "hi": "लकड़ी काटना", "en": "wood cutting" },
+    "joinery": { "hi": "जोड़ाई", "en": "joinery" },
+
+    "sewing_machine": { "hi": "सिलाई मशीन चलाना", "en": "sewing machine operation" },
+    "stitching": { "hi": "सिलाई", "en": "stitching" },
+    "cutting_pattern": { "hi": "कटिंग और नाप", "en": "pattern cutting" },
+    "embroidery": { "hi": "कढ़ाई", "en": "embroidery" },
+    "weaving": { "hi": "बुनाई", "en": "weaving" },
+    "leather_cutting": { "hi": "चमड़ा काटना", "en": "leather cutting" },
+    "clay_preparation": { "hi": "मिट्टी तैयार करना", "en": "clay preparation" },
+    "wheel_throwing": { "hi": "चाक चलाना", "en": "potter's wheel" },
+    "kiln_firing": { "hi": "भट्टी में पकाना", "en": "kiln firing" },
+
+    "hair_cutting": { "hi": "बाल काटना", "en": "hair cutting" },
+    "hair_care": { "hi": "बालों की देखभाल", "en": "hair care" },
+    "skin_care": { "hi": "त्वचा की देखभाल", "en": "skin care" },
+
+    "animal_care": { "hi": "पशु देखभाल", "en": "animal care" },
+    "animal_health_basic": { "hi": "पशु स्वास्थ्य", "en": "basic animal health" },
+    "fodder_management": { "hi": "चारा प्रबंधन", "en": "fodder management" },
+    "milking_hygiene": { "hi": "साफ़ तरीके से दूध निकालना", "en": "hygienic milking" },
+    "poultry_care": { "hi": "मुर्गी पालन", "en": "poultry care" },
+    "crop_management": { "hi": "फसल की देखभाल", "en": "crop management" },
+    "soil_health": { "hi": "मिट्टी की सेहत", "en": "soil health" },
+    "organic_inputs": { "hi": "जैविक खाद बनाना", "en": "organic inputs" },
+    "mushroom_cultivation": { "hi": "मशरूम उगाना", "en": "mushroom cultivation" },
+
+    "food_hygiene": { "hi": "खाने की साफ़-सफ़ाई", "en": "food hygiene" },
+    "food_preservation": { "hi": "खाना सुरक्षित रखना", "en": "food preservation" },
+    "baking": { "hi": "बेकिंग", "en": "baking" },
+    "packaging": { "hi": "पैकिंग", "en": "packaging" },
+
+    "billing": { "hi": "बिल बनाना", "en": "billing" },
+    "stock_keeping": { "hi": "सामान का हिसाब", "en": "stock keeping" },
+    "two_wheeler_driving": { "hi": "दोपहिया चलाना", "en": "two-wheeler riding" },
+    "route_navigation": { "hi": "रास्ता ढूँढना", "en": "route navigation" },
+    "patient_care": { "hi": "मरीज़ की देखभाल", "en": "patient care" },
+    "first_aid": { "hi": "प्राथमिक उपचार", "en": "first aid" },
+    "computer_basics": { "hi": "कंप्यूटर चलाना", "en": "computer basics" },
+    "typing": { "hi": "टाइपिंग", "en": "typing" }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "_note": "Scheme descriptions spoken to beneficiaries. Deliberately no amounts or dates: those change and must come from the district officer or official guidelines. Verify wording against current guidelines before use.",
+  "schemes": [
+    {
+      "id": "pmajay_gia", "appliesTo": ["self", "both", "wage"],
+      "name": "PM-AJAY Grant-in-Aid",
+      "hi": "पीएम-अजय योजना से ट्रेनिंग और रोज़गार/अपने काम के लिए सहायता मिल सकती है। राशि और शर्तें ज़िला अधिकारी बताएँगे।",
+      "en": "PM-AJAY Grant-in-Aid can support training and livelihood or enterprise. The district officer confirms amounts and conditions."
+    },
+    {
+      "id": "rpl", "appliesTo": ["rpl"],
+      "name": "Recognition of Prior Learning (RPL)",
+      "hi": "जो काम आपको पहले से आता है, उसका छोटा आकलन करके सरकारी प्रमाणपत्र मिल सकता है — लंबा कोर्स ज़रूरी नहीं।",
+      "en": "Skills you already have can be assessed and certified through RPL, without a long course."
+    },
+    {
+      "id": "enterprise_loans", "appliesTo": ["self", "both"],
+      "name": "Enterprise loans (NSFDC, Mudra, Stand-Up India)",
+      "hi": "अपना काम शुरू करने के लिए कर्ज़ की योजनाएँ हैं। आपके सलाहकार कागज़ और आवेदन में मदद करेंगे।",
+      "en": "Loan schemes such as NSFDC, Mudra and Stand-Up India exist for starting a business; your consultant helps with the paperwork."
+    }
+  ]
+}

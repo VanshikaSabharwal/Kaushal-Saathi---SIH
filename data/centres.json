@@ -1,0 +1,31 @@
+{
+  "_note": "SAMPLE training centres for the demo. Names are placeholders, not real institutions; coordinates sit at block centres. Replace with real ITI / PMKVY / JSS centre data (and live batches/seats) from Skill India Digital Hub.",
+  "centres": [
+    { "id": "j1", "name": "Sample ITI – Jhansi City", "type": "ITI", "district": "jhansi", "block": "Jhansi City", "lat": 25.452, "lon": 78.575, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_2w_service", "c_2w_tech", "c_asst_electrician", "c_solar_installer", "c_plumber", "c_carpenter", "c_mobile_repair", "c_cctv_tech"] },
+    { "id": "j2", "name": "Sample PMKVY Centre – Babina", "type": "PMKVY", "district": "jhansi", "block": "Babina", "lat": 25.245, "lon": 78.472, "womenOnlyBatch": true, "accessible": false, "sample": true,
+      "courses": ["c_2w_service", "c_retail", "c_delivery", "c_beauty_asst", "c_smo", "c_gda"] },
+    { "id": "j3", "name": "Sample JSS Centre – Moth", "type": "JSS", "district": "jhansi", "block": "Moth", "lat": 25.718, "lon": 78.948, "womenOnlyBatch": true, "accessible": true, "sample": true,
+      "courses": ["c_self_tailor", "c_hand_embroiderer", "c_terracotta", "c_pickle", "c_goat_farmer", "c_dairy_farmer", "c_organic_grower"] },
+    { "id": "j4", "name": "Sample PMKVY Centre – Mauranipur", "type": "PMKVY", "district": "jhansi", "block": "Mauranipur", "lat": 25.243, "lon": 79.128, "womenOnlyBatch": false, "accessible": false, "sample": true,
+      "courses": ["c_mason", "c_leather_goods", "c_hair_stylist", "c_poultry", "c_mushroom", "c_warehouse"] },
+
+    { "id": "g1", "name": "Sample ITI – Gaya Town", "type": "ITI", "district": "gaya", "block": "Gaya Town", "lat": 24.795, "lon": 85.004, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_asst_electrician", "c_2w_service", "c_2w_tech", "c_mobile_repair", "c_plumber", "c_carpenter", "c_data_entry"] },
+    { "id": "g2", "name": "Sample PMKVY Centre – Bodh Gaya", "type": "PMKVY", "district": "gaya", "block": "Bodh Gaya", "lat": 24.698, "lon": 84.989, "womenOnlyBatch": true, "accessible": true, "sample": true,
+      "courses": ["c_fnb_steward", "c_beauty_asst", "c_hair_stylist", "c_retail", "c_baker", "c_gda"] },
+    { "id": "g3", "name": "Sample JSS Centre – Sherghati", "type": "JSS", "district": "gaya", "block": "Sherghati", "lat": 24.562, "lon": 84.793, "womenOnlyBatch": true, "accessible": false, "sample": true,
+      "courses": ["c_self_tailor", "c_hand_embroiderer", "c_pickle", "c_mushroom", "c_goat_farmer", "c_dairy_farmer", "c_terracotta"] },
+    { "id": "g4", "name": "Sample PMKVY Centre – Tekari", "type": "PMKVY", "district": "gaya", "block": "Tekari", "lat": 24.938, "lon": 84.843, "womenOnlyBatch": false, "accessible": false, "sample": true,
+      "courses": ["c_organic_grower", "c_poultry", "c_mason", "c_solar_installer", "c_smo", "c_leather_goods"] },
+
+    { "id": "n1", "name": "Sample ITI – Nashik City", "type": "ITI", "district": "nashik", "block": "Nashik City", "lat": 20.002, "lon": 73.785, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_2w_service", "c_2w_tech", "c_asst_electrician", "c_solar_installer", "c_cctv_tech", "c_mobile_repair", "c_data_entry", "c_micro_irrigation"] },
+    { "id": "n2", "name": "Sample PMKVY Centre – Sinnar", "type": "PMKVY", "district": "nashik", "block": "Sinnar", "lat": 19.853, "lon": 74.002, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_warehouse", "c_delivery", "c_retail", "c_gda", "c_fnb_steward", "c_baker"] },
+    { "id": "n3", "name": "Sample JSS Centre – Igatpuri", "type": "JSS", "district": "nashik", "block": "Igatpuri", "lat": 19.697, "lon": 73.563, "womenOnlyBatch": true, "accessible": false, "sample": true,
+      "courses": ["c_self_tailor", "c_hand_embroiderer", "c_pickle", "c_mushroom", "c_beauty_asst", "c_goat_farmer"] },
+    { "id": "n4", "name": "Sample PMKVY Centre – Niphad", "type": "PMKVY", "district": "nashik", "block": "Niphad", "lat": 20.078, "lon": 74.108, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_organic_grower", "c_micro_irrigation", "c_dairy_farmer", "c_poultry", "c_plumber", "c_mason", "c_hair_stylist", "c_leather_goods", "c_smo"] }
+  ]
+}
