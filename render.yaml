@@ -55,6 +55,17 @@ services:
         sync: false
       - key: BODHAN_TTS_API_KEY
         sync: false
+      - key: BODHAN_TRANSLATE_API_KEY
+        sync: false
+
+      # Must be the same value as on the Next app: the voice server checks the
+      # call tickets it signs. Different or missing = every call is anonymous.
+      - key: SESSION_SECRET
+        sync: false
+      # Same value as on the Next app. Without it the /internal/* routes
+      # (call transcripts, beneficiary records) are open to anyone.
+      - key: INTERNAL_TOKEN
+        sync: false
 
 # Two caveats worth knowing before this carries real calls:
 #

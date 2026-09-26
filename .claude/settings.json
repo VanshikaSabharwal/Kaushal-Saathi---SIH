@@ -67,7 +67,13 @@
       "Bash(node prefetch.mjs Punjabi)",
       "Bash([ -f \"$f\" ])",
       "Bash(node -e ' *)",
-      "WebFetch(domain:console.bodhan.ai)"
+      "WebFetch(domain:console.bodhan.ai)",
+      "Bash(timeout 20 npx tsx voice-server/index.ts)",
+      "Bash(curl -s -o /dev/null -w \"3001:%{http_code}\\\\n\" localhost:3001/)",
+      "Bash(node -e 'const p=require\\(\"./package.json\"\\);console.log\\(\"tsx in deps:\",!!p.dependencies?.tsx,\"dev:\",!!p.devDependencies?.tsx, \"ingest:\",p.scripts.ingest\\)')",
+      "Bash(awk '{print $2}')",
+      "Bash(curl -s -m 60 -w \"\\\\nHTTP %{http_code} in %{time_total}s\\\\n\" https://kaushal-saathi-sih.onrender.com/internal/health)",
+      "Bash(curl -s -m 30 -o /dev/null -w \"internal route without token: HTTP %{http_code}\\\\n\" https://kaushal-saathi-sih.onrender.com/internal/calls)"
     ],
     "additionalDirectories": [
       "/home/vanshika/Downloads/",
