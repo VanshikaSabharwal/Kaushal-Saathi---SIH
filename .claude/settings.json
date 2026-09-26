@@ -117,7 +117,8 @@
       "Bash(rm -rf cp13)",
       "Bash(timeout 90 node otp_en.mjs /tmp/claude-1000/-home-vanshika-internships-sih/338af9ee-e46c-4423-b2b9-58a316058a9b/scratchpad/cp13 http://localhost:3999)",
       "Bash(sed -i -e 's#await click\\(\"कोड भेजें\"\\)#await ev\\(`\\(\\(\\) => { const b = document.querySelector\\(\"input[autocomplete=tel]\"\\).closest\\(\"div.space-y-4\"\\).querySelector\\(\"button\"\\); b.click\\(\\); return b.textContent; }\\)\\(\\)`\\)#' -e 's#await click\\(\"आगे बढ़ें\"\\)#await ev\\(`\\(\\(\\) => { const b = document.querySelector\\(\"input[autocomplete=one-time-code]\"\\).closest\\(\"div.space-y-4\"\\).querySelector\\(\"button\"\\); b.click\\(\\); return b.textContent; }\\)\\(\\)`\\)#' otp_en.mjs)",
-      "Bash(sed -i 's#document.querySelector\\(.b\\\\[translate=\"no\"\\\\].\\)?.textContent#\\(document.querySelector\\(\"b[translate=no]\"\\)?.textContent\\)#' otp_en.mjs)"
+      "Bash(sed -i 's#document.querySelector\\(.b\\\\[translate=\"no\"\\\\].\\)?.textContent#\\(document.querySelector\\(\"b[translate=no]\"\\)?.textContent\\)#' otp_en.mjs)",
+      "Bash(MONGODB_URL= NEXT_PUBLIC_VOICE_ENGINE= npx next build)"
     ],
     "additionalDirectories": [
       "/home/vanshika/Downloads/",
