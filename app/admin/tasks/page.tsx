@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Task } from "../../../lib/store/tasks";
-import { DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
+import { DistrictPicker, ErrorNote, ListSkeleton, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
 import { api, Button, Card, fmtDate } from "../../components/ks/ui";
 
 const TYPES: Record<string, string> = {
@@ -25,7 +25,7 @@ export default function Tasks() {
   if (district) params.set("district", district);
   if (type) params.set("type", type);
 
-  const { data, error, reload } = useJson<{ tasks: Task[] }>(`/api/tasks?${params}`);
+  const { data, error, reload, loading } = useJson<{ tasks: Task[] }>(`/api/tasks?${params}`);
   // Fixed at first render: "overdue" should not flicker as the clock moves.
   const [now] = useState(() => Date.now());
 
@@ -39,6 +39,7 @@ export default function Tasks() {
       <PageTitle
         title="Needs attention"
         sub="Work the bot could not finish, with an owner and a due date."
+        loading={loading}
         right={
           <div className="flex flex-wrap gap-2">
             <select value={type} onChange={(e) => setType(e.target.value)} className="rounded-lg border border-[var(--border-strong)] bg-white px-2 py-1.5 text-sm">
@@ -55,7 +56,8 @@ export default function Tasks() {
       />
       <ErrorNote error={error} />
 
-      <div className="space-y-2">
+      <div className={`space-y-2 transition-opacity ${data && loading ? "opacity-50" : ""}`}>
+        {!data && loading && <ListSkeleton rows={5} card />}
         {(data?.tasks ?? []).map((t) => {
           const overdue = t.status === "open" && t.dueAt < now;
           return (

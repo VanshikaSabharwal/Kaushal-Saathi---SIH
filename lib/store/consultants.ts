@@ -35,10 +35,13 @@ const MIN_CASES_FOR_SCORE = 3;
 
 /** First boot: the shipped sample list becomes the editable registry. */
 export async function seedConsultants(): Promise<void> {
-  if ((await consultants.list({}, { limit: 1 })).length > 0) return;
+  // Per id, not "only when empty": a district added to the sample data later
+  // must reach a registry that already exists. Stored records are never
+  // overwritten, so officers' edits (verification, caseload) are kept.
+  const stored = new Set((await consultants.list({}, { limit: 5000 })).map((c) => c.id));
 
   for (const c of CONSULTANTS) {
-    await consultants.upsert({ ...c, certifications: [], createdAt: Date.now() });
+    if (!stored.has(c.id)) await consultants.upsert({ ...c, certifications: [], createdAt: Date.now() });
   }
 }
 

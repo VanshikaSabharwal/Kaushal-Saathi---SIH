@@ -7,7 +7,7 @@
  * say, and the perspective plan as a download.
  */
 
-import { Bar, DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
+import { Bar, CardSkeleton, DistrictPicker, ErrorNote, PageTitle, Refreshing, useDistrict, useJson } from "../../components/ks/admin";
 import { api, Button, Card } from "../../components/ks/ui";
 
 type Insights = {
@@ -24,7 +24,7 @@ type Insights = {
 export default function InsightsPage() {
   const [district, setDistrict, options] = useDistrict();
   const effective = district || options[0]?.id || "";
-  const { data, error } = useJson<Insights>(effective ? `/api/insights?district=${effective}` : null);
+  const { data, error, loading } = useJson<Insights>(effective ? `/api/insights?district=${effective}` : null);
 
   async function downloadPlan() {
     const r = await api<{ csv: string; district: string }>(`/api/plan?district=${effective}`);
@@ -43,6 +43,7 @@ export default function InsightsPage() {
       <PageTitle
         title={`District insights${d ? ` — ${d.district.name}` : ""}`}
         sub={d ? `${d.people} people · ${d.district.state}` : undefined}
+        loading={loading}
         right={
           <div className="flex gap-2">
             <DistrictPicker value={effective} onChange={setDistrict} options={options} allowAll={false} />
@@ -52,7 +53,18 @@ export default function InsightsPage() {
       />
       <ErrorNote error={error} />
 
+      {!d && loading && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          <CardSkeleton rows={6} />
+          <CardSkeleton rows={4} variant="lines" />
+          <CardSkeleton rows={6} variant="lines" className="lg:col-span-2" />
+          <CardSkeleton rows={4} variant="lines" />
+          <CardSkeleton rows={3} variant="lines" />
+        </div>
+      )}
+
       {d && (
+        <Refreshing busy={loading}>
         <div className="grid gap-5 lg:grid-cols-2">
           <Card title="Skill gaps to plan training for">
             {d.skillGaps.length === 0 && <p className="text-xs text-[var(--text-muted)]">No completed interviews yet.</p>}
@@ -130,6 +142,7 @@ export default function InsightsPage() {
             )}
           </Card>
         </div>
+        </Refreshing>
       )}
     </div>
   );

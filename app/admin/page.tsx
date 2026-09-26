@@ -3,7 +3,7 @@
 /** Overview: the pipeline, the queue, quality signals and where people drop off. */
 
 import Link from "next/link";
-import { Bar, DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../components/ks/admin";
+import { Bar, CardSkeleton, DistrictPicker, ErrorNote, PageTitle, Refreshing, StatsSkeleton, useDistrict, useJson } from "../components/ks/admin";
 import { Card, Stat, STATUS_EN } from "../components/ks/ui";
 
 type Stats = {
@@ -26,7 +26,7 @@ const QUESTION_EN: Record<string, string> = {
 
 export default function Overview() {
   const [district, setDistrict, options] = useDistrict();
-  const { data, error } = useJson<Stats>(`/api/stats${district ? `?district=${district}` : ""}`);
+  const { data, error, loading } = useJson<Stats>(`/api/stats${district ? `?district=${district}` : ""}`);
 
   const s = data;
   const working = s ? (s.byStatus.placed ?? 0) + (s.byStatus.self_employed ?? 0) + (s.byStatus.retained ?? 0) : 0;
@@ -35,10 +35,23 @@ export default function Overview() {
 
   return (
     <div>
-      <PageTitle title="Overview" sub="Beneficiaries from first conversation to work." right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
+      <PageTitle title="Overview" sub="Beneficiaries from first conversation to work." loading={loading} right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
       <ErrorNote error={error} />
 
+      {!s && loading && (
+        <div className="space-y-5">
+          <StatsSkeleton count={6} className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6" />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <CardSkeleton rows={10} />
+            <CardSkeleton rows={5} variant="lines" />
+            <CardSkeleton rows={4} variant="lines" />
+            <CardSkeleton rows={5} />
+          </div>
+        </div>
+      )}
+
       {s && (
+        <Refreshing busy={loading}>
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
             <Stat label="People interviewed" value={s.total} />
@@ -106,6 +119,7 @@ export default function Overview() {
             </Card>
           )}
         </div>
+        </Refreshing>
       )}
     </div>
   );

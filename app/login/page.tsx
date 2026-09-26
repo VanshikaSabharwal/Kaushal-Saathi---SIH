@@ -51,7 +51,6 @@ function Login() {
         </label>
         {error && <p className="rounded-lg bg-[var(--danger-soft)] px-3 py-2 text-xs text-[var(--danger)]">{error}</p>}
         <Button type="submit" className="w-full py-2" disabled={busy || !username || !password}>Sign in</Button>
-        <p className="text-[11px] text-[var(--text-subtle)]">Demo accounts: run <code>npm run seed:users</code>.</p>
       </form>
     </div>
   );

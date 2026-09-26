@@ -6,12 +6,22 @@ import { useCallback, useEffect, useState } from "react";
 import { DISTRICTS } from "../../../lib/livelihood/catalog";
 import { api } from "./ui";
 import { useStaff } from "./StaffShell";
+import { Skeleton } from "./skeleton";
 
-/** Load JSON from an API route, with a reload() for after a change. */
+export { CardSkeleton, ListSkeleton, Skeleton, StatsSkeleton, TableRowsSkeleton } from "./skeleton";
+
+/**
+ * Load JSON from an API route, with a reload() for after a change.
+ * `loading` is true while a request is in flight — the first load (no data
+ * yet: show a skeleton) and later ones after a filter change (data is stale).
+ */
 export function useJson<T>(url: string | null) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
+  // Which request the current data answers; loading until it is the latest one.
+  const key = url ? `${url}#${version}` : null;
+  const [doneKey, setDoneKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!url) return;
@@ -21,6 +31,7 @@ export function useJson<T>(url: string | null) {
       if (cancelled) return;
       setData(r.ok ? r.data : null);
       setError(r.ok ? null : r.data.error ?? `Failed (${r.status})`);
+      setDoneKey(`${url}#${version}`);
     });
 
     // A newer request (filters changed) supersedes this one.
@@ -30,7 +41,16 @@ export function useJson<T>(url: string | null) {
   }, [url, version]);
 
   const reload = useCallback(() => setVersion((v) => v + 1), []);
-  return { data, error, reload };
+  return { data, error, reload, loading: key !== null && doneKey !== key };
+}
+
+/** Content being refreshed (filter changed): keep it in place, dimmed, until the new data lands. */
+export function Refreshing({ busy, children }: { busy: boolean; children: React.ReactNode }) {
+  return (
+    <div aria-busy={busy} className={`transition-opacity duration-200 ${busy ? "pointer-events-none opacity-50" : ""}`}>
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -71,12 +91,20 @@ export function DistrictPicker({
   );
 }
 
-export function PageTitle({ title, sub, right }: { title: string; sub?: string; right?: React.ReactNode }) {
+export function PageTitle({ title, sub, right, loading }: { title: string; sub?: string; right?: React.ReactNode; loading?: boolean }) {
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-xl font-semibold">{title}</h1>
-        {sub && <p className="mt-0.5 text-xs text-[var(--text-muted)]">{sub}</p>}
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          {title}
+          {loading && (
+            <span role="status" className="inline-flex items-center gap-1.5 text-xs font-normal text-[var(--text-muted)]">
+              <span aria-hidden className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--border-strong)] border-t-[var(--ks-primary)]" />
+              Loading…
+            </span>
+          )}
+        </h1>
+        {loading && !sub ? <Skeleton className="mt-1.5 h-3 w-48" /> : sub && <p className="mt-0.5 text-xs text-[var(--text-muted)]">{sub}</p>}
       </div>
       {right}
     </div>

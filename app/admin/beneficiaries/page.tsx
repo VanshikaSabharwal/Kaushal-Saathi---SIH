@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { getCourse, getDistrict } from "../../../lib/livelihood/catalog";
 import type { Beneficiary } from "../../../lib/store/beneficiaries";
-import { DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
+import { DistrictPicker, ErrorNote, PageTitle, TableRowsSkeleton, useDistrict, useJson } from "../../components/ks/admin";
 import { Card, fmtDateTime, STATUS_EN, StatusPill } from "../../components/ks/ui";
 
 export default function Beneficiaries() {
@@ -18,7 +18,7 @@ export default function Beneficiaries() {
   if (district) params.set("district", district);
   if (status) params.set("status", status);
 
-  const { data, error } = useJson<{ beneficiaries: Beneficiary[] }>(`/api/beneficiaries?${params}`);
+  const { data, error, loading } = useJson<{ beneficiaries: Beneficiary[] }>(`/api/beneficiaries?${params}`);
 
   const rows = useMemo(() => {
     const list = data?.beneficiaries ?? [];
@@ -32,7 +32,8 @@ export default function Beneficiaries() {
     <div>
       <PageTitle
         title="Beneficiaries"
-        sub={`${rows.length} shown`}
+        sub={data ? `${rows.length} shown` : undefined}
+        loading={loading}
         right={
           <div className="flex flex-wrap gap-2">
             <input placeholder="Search phone / block" value={q} onChange={(e) => setQ(e.target.value)} className="rounded-lg border border-[var(--border-strong)] bg-white px-2 py-1.5 text-sm" />
@@ -59,7 +60,8 @@ export default function Beneficiaries() {
               <th className="px-3 py-2 font-medium">Last activity</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className={`transition-opacity ${data && loading ? "opacity-50" : ""}`}>
+            {!data && loading && <TableRowsSkeleton cols={7} />}
             {rows.map((b) => {
               const course = getCourse(b.chosen?.courseId ?? b.recommendations[0]?.courseId ?? "");
               return (
@@ -80,7 +82,7 @@ export default function Beneficiaries() {
                 </tr>
               );
             })}
-            {rows.length === 0 && (
+            {data && rows.length === 0 && (
               <tr><td colSpan={7} className="px-3 py-8 text-center text-xs text-[var(--text-muted)]">No beneficiaries yet.</td></tr>
             )}
           </tbody>

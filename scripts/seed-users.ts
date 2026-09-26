@@ -22,6 +22,7 @@ const ACCOUNTS = [
   { username: "jhansi_officer", name: "District Officer, Jhansi", role: "district", district: "jhansi" },
   { username: "gaya_officer", name: "District Officer, Gaya", role: "district", district: "gaya" },
   { username: "nashik_officer", name: "District Officer, Nashik", role: "district", district: "nashik" },
+  { username: "ratlam_officer", name: "District Officer, Ratlam", role: "district", district: "ratlam" },
   { username: "jhansi_saathi", name: "Saathi, Jhansi", role: "saathi", district: "jhansi" },
   { username: "centre_j2", name: "Sample PMKVY Centre – Babina", role: "centre", centreId: "j2", district: "jhansi" },
   { username: "consultant_j1", name: "Sample Consultant A", role: "consultant", consultantId: "fc_j1", district: "jhansi" },

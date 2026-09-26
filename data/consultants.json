@@ -6,6 +6,8 @@
     { "id": "fc_j3", "name": "Sample Consultant C", "district": "jhansi", "blocks": ["Moth"], "languages": ["hi"], "specialisations": ["mudra"], "verified": false, "capacity": 20, "activeCases": 2, "sample": true },
     { "id": "fc_g1", "name": "Sample Consultant D", "district": "gaya", "blocks": ["Gaya Town", "Bodh Gaya", "Tekari"], "languages": ["hi"], "specialisations": ["dpr", "mudra", "standup_india", "pmajay_gia"], "verified": true, "capacity": 30, "activeCases": 9, "sample": true },
     { "id": "fc_g2", "name": "Sample Consultant E", "district": "gaya", "blocks": ["Sherghati"], "languages": ["hi"], "specialisations": ["nsfdc", "bookkeeping", "pmajay_gia"], "verified": true, "capacity": 15, "activeCases": 4, "sample": true },
-    { "id": "fc_n1", "name": "Sample Consultant F", "district": "nashik", "blocks": ["Nashik City", "Sinnar", "Igatpuri", "Niphad"], "languages": ["mr", "hi"], "specialisations": ["dpr", "mudra", "nsfdc", "pmajay_gia"], "verified": true, "capacity": 30, "activeCases": 14, "sample": true }
+    { "id": "fc_n1", "name": "Sample Consultant F", "district": "nashik", "blocks": ["Nashik City", "Sinnar", "Igatpuri", "Niphad"], "languages": ["mr", "hi"], "specialisations": ["dpr", "mudra", "nsfdc", "pmajay_gia"], "verified": true, "capacity": 30, "activeCases": 14, "sample": true },
+    { "id": "fc_r1", "name": "Sample Consultant G", "district": "ratlam", "blocks": ["Ratlam City", "Jaora", "Alot"], "languages": ["hi"], "specialisations": ["dpr", "mudra", "standup_india", "pmajay_gia"], "verified": true, "capacity": 25, "activeCases": 7, "sample": true },
+    { "id": "fc_r2", "name": "Sample Consultant H", "district": "ratlam", "blocks": ["Sailana"], "languages": ["hi"], "specialisations": ["nsfdc", "bookkeeping", "pmajay_gia"], "verified": true, "capacity": 15, "activeCases": 3, "sample": true }
   ]
 }

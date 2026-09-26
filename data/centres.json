@@ -26,6 +26,14 @@
     { "id": "n3", "name": "Sample JSS Centre – Igatpuri", "type": "JSS", "district": "nashik", "block": "Igatpuri", "lat": 19.697, "lon": 73.563, "womenOnlyBatch": true, "accessible": false, "sample": true,
       "courses": ["c_self_tailor", "c_hand_embroiderer", "c_pickle", "c_mushroom", "c_beauty_asst", "c_goat_farmer"] },
     { "id": "n4", "name": "Sample PMKVY Centre – Niphad", "type": "PMKVY", "district": "nashik", "block": "Niphad", "lat": 20.078, "lon": 74.108, "womenOnlyBatch": false, "accessible": true, "sample": true,
-      "courses": ["c_organic_grower", "c_micro_irrigation", "c_dairy_farmer", "c_poultry", "c_plumber", "c_mason", "c_hair_stylist", "c_leather_goods", "c_smo"] }
+      "courses": ["c_organic_grower", "c_micro_irrigation", "c_dairy_farmer", "c_poultry", "c_plumber", "c_mason", "c_hair_stylist", "c_leather_goods", "c_smo"] },
+    { "id": "r1", "name": "Sample ITI – Ratlam City", "type": "ITI", "district": "ratlam", "block": "Ratlam City", "lat": 23.338, "lon": 75.041, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_asst_electrician", "c_2w_service", "c_2w_tech", "c_mobile_repair", "c_cctv_tech", "c_warehouse", "c_delivery", "c_data_entry"] },
+    { "id": "r2", "name": "Sample PMKVY Centre – Jaora", "type": "PMKVY", "district": "ratlam", "block": "Jaora", "lat": 23.641, "lon": 75.129, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_pickle", "c_baker", "c_organic_grower", "c_micro_irrigation", "c_retail", "c_solar_installer", "c_gda"] },
+    { "id": "r3", "name": "Sample JSS Centre – Sailana", "type": "JSS", "district": "ratlam", "block": "Sailana", "lat": 23.466, "lon": 74.926, "womenOnlyBatch": true, "accessible": false, "sample": true,
+      "courses": ["c_self_tailor", "c_hand_embroiderer", "c_goat_farmer", "c_poultry", "c_mushroom", "c_beauty_asst"] },
+    { "id": "r4", "name": "Sample PMKVY Centre – Alot", "type": "PMKVY", "district": "ratlam", "block": "Alot", "lat": 23.760, "lon": 75.552, "womenOnlyBatch": false, "accessible": true, "sample": true,
+      "courses": ["c_dairy_farmer", "c_mason", "c_plumber", "c_carpenter", "c_hair_stylist", "c_smo"] }
   ]
 }

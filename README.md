@@ -52,6 +52,32 @@ npm run seed:users                # demo staff accounts (prints the password)
 npm run dev                       # :3000 app, :3001 voice server
 ```
 
+### Staff sign-in (demo accounts)
+
+`npm run seed:users` creates one account per role, all sharing one password,
+and prints it. Choose it yourself with `DEMO_PASSWORD=... npm run seed:users`;
+re-running resets it.
+
+| Username | Role | Sees |
+|---|---|---|
+| `ministry` | Ministry | every state and district |
+| `up_state` | State corporation | Uttar Pradesh |
+| `jhansi_officer`, `gaya_officer`, `nashik_officer`, `ratlam_officer` | District officer | their district |
+| `jhansi_saathi` | Saathi | Jhansi |
+| `centre_j2` | Training centre | its own trainees |
+| `consultant_j1` | Financial consultant | their own cases |
+
+Sign in at `/login`. The script writes to the same store the app reads: MongoDB
+when `MONGODB_URL` is set, otherwise `.data/`. For the deployed site, run it
+with the production `MONGODB_URL` and `MONGODB_DB`, or the accounts land only
+on your laptop:
+
+```bash
+MONGODB_URL="mongodb+srv://..." MONGODB_DB=kaushal_saathi DEMO_PASSWORD=... npm run seed:users
+```
+
+These are shared demo logins. Give real officers their own accounts.
+
 ## Check
 
 ```bash

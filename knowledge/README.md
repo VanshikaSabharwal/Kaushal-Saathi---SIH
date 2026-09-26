@@ -9,7 +9,7 @@ knowledge/<state>/<district-id>/<type>_<anything>.pdf|.md|.txt
 ```
 
 `<district-id>` must match an `id` in `data/districts.json` (e.g. `jhansi`,
-`gaya`, `nashik`). The file-name prefix sets the source type:
+`gaya`, `nashik`, `ratlam`). The file-name prefix sets the source type:
 
 | Prefix | Document | Where to get it |
 |---|---|---|

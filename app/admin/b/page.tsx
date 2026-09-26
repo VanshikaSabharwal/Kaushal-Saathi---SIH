@@ -12,7 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { CENTRES, CONSULTANTS, getCourse, getDistrict, skillLabel, TRADES } from "../../../lib/livelihood/catalog";
 import type { Beneficiary } from "../../../lib/store/beneficiaries";
 import type { Task } from "../../../lib/store/tasks";
-import { ErrorNote, PageTitle, useJson } from "../../components/ks/admin";
+import { CardSkeleton, ErrorNote, PageTitle, useJson } from "../../components/ks/admin";
 import { useStaff } from "../../components/ks/StaffShell";
 import { api, Button, Card, fmtDate, fmtDateTime, STATUS_EN, StatusPill } from "../../components/ks/ui";
 
@@ -36,7 +36,21 @@ function Detail() {
   const [now] = useState(() => Date.now());
 
   const b = data?.beneficiary;
-  if (!b) return <><ErrorNote error={error} /><p className="text-sm text-[var(--text-muted)]">{error ? "" : "Loading…"}</p></>;
+  if (!b) {
+    if (error) return <ErrorNote error={error} />;
+    return (
+      <div className="space-y-5">
+        <PageTitle title="Beneficiary" loading />
+        <div className="grid gap-5 xl:grid-cols-3">
+          <CardSkeleton rows={10} variant="lines" />
+          <div className="space-y-5 xl:col-span-2">
+            <CardSkeleton rows={4} variant="lines" />
+            <CardSkeleton rows={3} variant="lines" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const p = b.profile;
   const role = user?.role ?? "consultant";

@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { getCourse } from "../../../lib/livelihood/catalog";
-import { Bar, DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
+import { Bar, CardSkeleton, DistrictPicker, ErrorNote, PageTitle, Refreshing, useDistrict, useJson } from "../../components/ks/admin";
 import { Card, STATUS_EN } from "../../components/ks/ui";
 
 type Placement = {
@@ -15,15 +15,24 @@ type Placement = {
 
 export default function PlacementPage() {
   const [district, setDistrict, options] = useDistrict();
-  const { data, error } = useJson<Placement>(`/api/placement${district ? `?district=${district}` : ""}`);
+  const { data, error, loading } = useJson<Placement>(`/api/placement${district ? `?district=${district}` : ""}`);
   const max = Math.max(1, ...Object.values(data?.pipeline ?? { x: 1 }));
 
   return (
     <div>
-      <PageTitle title="Placement" sub="Certified → working, measured by 30- and 90-day follow-up calls." right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
+      <PageTitle title="Placement" sub="Certified → working, measured by 30- and 90-day follow-up calls." loading={loading} right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
       <ErrorNote error={error} />
 
+      {!data && loading && (
+        <div className="grid gap-5 lg:grid-cols-2">
+          <CardSkeleton rows={5} />
+          <CardSkeleton rows={4} />
+          <CardSkeleton rows={6} variant="lines" className="lg:col-span-2" />
+        </div>
+      )}
+
       {data && (
+        <Refreshing busy={loading}>
         <div className="grid gap-5 lg:grid-cols-2">
           <Card title="After training">
             <div className="space-y-1.5">
@@ -64,6 +73,7 @@ export default function PlacementPage() {
             </ul>
           </Card>
         </div>
+        </Refreshing>
       )}
     </div>
   );

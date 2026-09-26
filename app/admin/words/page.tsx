@@ -7,7 +7,7 @@
 
 import { allowedValues, type SlotId } from "../../../lib/livelihood/extract";
 import type { UnknownWord } from "../../../lib/store/unknown-words";
-import { ErrorNote, PageTitle, useJson } from "../../components/ks/admin";
+import { ErrorNote, ListSkeleton, PageTitle, Skeleton, useJson } from "../../components/ks/admin";
 import { api, Button, Card, fmtDate } from "../../components/ks/ui";
 
 export default function WordsPage() {
@@ -22,10 +22,11 @@ export default function WordsPage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="Dialect words" sub="What callers said that the assistant did not understand. Teach it once; every later call understands." />
+      <PageTitle title="Dialect words" sub="What callers said that the assistant did not understand. Teach it once; every later call understands." loading={!data && !error} />
       <ErrorNote error={error} />
 
       <Card title="To review">
+        {!data && !error && <ListSkeleton rows={4} />}
         <ul className="divide-y divide-[var(--border)]">
           {(data?.words ?? []).map((w) => {
             const allowed = allowedValues(w.slot as SlotId);
@@ -61,6 +62,7 @@ export default function WordsPage() {
 
       <Card title="Taught so far">
         <ul className="space-y-1 text-sm">
+          {!mapped.data && !mapped.error && [0, 1, 2].map((i) => <li key={i}><Skeleton className={`h-3.5 ${i % 2 ? "w-1/2" : "w-2/3"}`} /></li>)}
           {(mapped.data?.words ?? []).map((w) => (
             <li key={w.id} className="flex justify-between gap-2">
               <span>“{w.text}” → <b>{w.mappedTo}</b> <span className="text-xs text-[var(--text-muted)]">({w.slot})</span></span>

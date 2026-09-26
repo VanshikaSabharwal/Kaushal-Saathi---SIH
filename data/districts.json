@@ -45,6 +45,21 @@
         "apparel": 0.5, "dairy_livestock": 0.5, "beauty": 0.5, "hospitality": 0.5, "plumbing": 0.5,
         "it_ites": 0.4, "furniture": 0.4, "handicrafts": 0.3, "leather": 0.3
       }
+    },
+    {
+      "id": "ratlam", "name": "Ratlam", "nameHi": "रतलाम", "state": "Madhya Pradesh", "defaultLanguage": "hi",
+      "blocks": [
+        { "name": "Ratlam City", "nameHi": "रतलाम शहर", "lat": 23.334, "lon": 75.037 },
+        { "name": "Jaora", "nameHi": "जावरा", "lat": 23.638, "lon": 75.126 },
+        { "name": "Sailana", "nameHi": "सैलाना", "lat": 23.463, "lon": 74.923 },
+        { "name": "Alot", "nameHi": "आलोट", "lat": 23.763, "lon": 75.555 }
+      ],
+      "demand": {
+        "food_processing": 0.8, "agriculture": 0.7, "logistics": 0.7, "retail": 0.6, "dairy_livestock": 0.6,
+        "construction": 0.6, "automotive": 0.6, "electrical": 0.5, "apparel": 0.5, "handicrafts": 0.5,
+        "beauty": 0.5, "healthcare": 0.5, "electronics_repair": 0.5, "solar": 0.5, "plumbing": 0.4,
+        "hospitality": 0.4, "furniture": 0.4, "it_ites": 0.3, "leather": 0.3
+      }
     }
   ]
 }

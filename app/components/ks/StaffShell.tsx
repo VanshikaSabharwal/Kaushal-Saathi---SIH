@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { StaffSession } from "../../../lib/auth/session";
+import { CardSkeleton, Skeleton, StatsSkeleton } from "./skeleton";
 import { LanguagePicker, TranslateProvider } from "./Translate";
 
 const StaffContext = createContext<StaffSession | null>(null);
@@ -71,7 +72,30 @@ export default function StaffShell({ children }: { children: React.ReactNode }) 
       </TranslateProvider>
     );
   }
-  if (!checked || !user) return <p className="p-8 text-sm text-[var(--text-muted)]">Loading…</p>;
+  // Checking the session (or on the way to /login): the shell's shape, so the page does not pop in from blank.
+  if (!checked || !user) {
+    return (
+      <div role="status" aria-label="Loading" className="flex min-h-screen flex-col bg-[var(--background)] lg:flex-row">
+        <aside className="bg-[var(--ks-primary)] px-4 py-4 lg:w-60">
+          <p className="text-base font-bold text-white">कौशल साथी · Admin</p>
+          <span className="mt-2 block h-3 w-32 animate-pulse rounded bg-white/20" />
+          <div className="mt-5 flex gap-2 overflow-hidden lg:flex-col">
+            {Array.from({ length: 7 }, (_, i) => (
+              <span key={i} className="block h-8 w-24 shrink-0 animate-pulse rounded-lg bg-white/10 lg:w-full" />
+            ))}
+          </div>
+        </aside>
+        <main className="min-w-0 flex-1 space-y-5 p-4 sm:p-6">
+          <Skeleton className="h-6 w-48" />
+          <StatsSkeleton count={4} />
+          <div className="grid gap-5 lg:grid-cols-2">
+            <CardSkeleton rows={6} />
+            <CardSkeleton rows={4} variant="lines" />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const scope = user.district ?? user.state ?? (user.role === "ministry" ? "All India" : "");
   const items = NAV.filter((n) => !n.roles || n.roles.includes(user.role));

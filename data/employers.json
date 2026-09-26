@@ -7,6 +7,8 @@
     { "id": "e_g1", "name": "Sample Hotel Group – Bodh Gaya", "district": "gaya", "block": "Bodh Gaya", "sectors": ["hospitality", "food_processing"], "openings": 8, "sample": true },
     { "id": "e_g2", "name": "Sample Hospital – Gaya", "district": "gaya", "block": "Gaya Town", "sectors": ["healthcare"], "openings": 5, "sample": true },
     { "id": "e_n1", "name": "Sample Auto Components Plant – Sinnar", "district": "nashik", "block": "Sinnar", "sectors": ["automotive", "logistics"], "openings": 15, "sample": true },
-    { "id": "e_n2", "name": "Sample Food Processing Unit – Niphad", "district": "nashik", "block": "Niphad", "sectors": ["food_processing", "agriculture"], "openings": 12, "sample": true }
+    { "id": "e_n2", "name": "Sample Food Processing Unit – Niphad", "district": "nashik", "block": "Niphad", "sectors": ["food_processing", "agriculture"], "openings": 12, "sample": true },
+    { "id": "e_r1", "name": "Sample Namkeen Factory – Ratlam", "district": "ratlam", "block": "Ratlam City", "sectors": ["food_processing", "retail"], "openings": 10, "sample": true },
+    { "id": "e_r2", "name": "Sample Logistics Yard – Ratlam", "district": "ratlam", "block": "Ratlam City", "sectors": ["logistics", "automotive"], "openings": 6, "sample": true }
   ]
 }

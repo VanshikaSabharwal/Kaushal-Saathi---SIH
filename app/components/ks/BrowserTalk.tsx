@@ -46,7 +46,7 @@ export function browserVoiceSupported(): boolean {
 
 const PHASE_HI: Record<Phase, string> = {
   idle: "बात शुरू करने के लिए बटन दबाइए",
-  speaking: "बोल रही हूँ… (बीच में बोलना हो तो बटन दबाइए)",
+  speaking: "बोल रही हूँ… (बीच में भी बोल सकते हैं)",
   listening: "बोलिए, मैं सुन रही हूँ…",
   thinking: "सोच रही हूँ…",
   ended: "बात पूरी हुई",
@@ -54,6 +54,43 @@ const PHASE_HI: Record<Phase, string> = {
 
 const BCP47: Record<string, string> = { hi: "hi-IN", mr: "mr-IN" };
 const MAX_SILENT_TRIES = 3;
+/** Quiet this long after the assistant stops (or after the last word) ends the turn. */
+const SILENCE_MS = 7000;
+
+function words(text: string): string[] {
+  return text.toLowerCase().replace(/[.,!?;:।॥"'`—-]/g, " ").split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Is the person talking over the assistant, rather than the mic hearing the
+ * assistant's own voice? Without headphones the speaker reaches the mic and
+ * the recogniser transcribes it, so words the assistant is saying right now
+ * do not count. A single stray word does not either, unless it is final.
+ */
+function talkingOver(heard: string, spoken: string, final: boolean): boolean {
+  const said = new Set(words(spoken));
+  const all = words(heard);
+  const fresh = all.filter((w) => !said.has(w));
+  return fresh.length >= (final ? 1 : 2) && fresh.length * 2 >= all.length;
+}
+
+/**
+ * One recognition session. "watch" runs while the assistant speaks, only to
+ * notice being talked over; "listen" is taking the person's answer. The same
+ * session carries on from one to the other, so the first words of an
+ * interruption are not lost to a restart.
+ */
+type Ear = {
+  r: Recognition;
+  mode: "watch" | "listen";
+  /** Results before this index are the assistant's own voice; ignored. */
+  from: number;
+  count: number;
+  final: string;
+  interim: string;
+  startedAt: number;
+  timer?: ReturnType<typeof setTimeout>;
+};
 
 /** Chrome drops long utterances; speak sentence by sentence. */
 function sentences(text: string): string[] {
@@ -80,14 +117,21 @@ export default function BrowserTalk({
 
   const session = useRef<string | null>(null);
   const lang = useRef("hi");
-  const recog = useRef<Recognition | null>(null);
+  const ear = useRef<Ear | null>(null);
   const silent = useRef(0);
   const active = useRef(false);
+  /** What is being said now; the id changes when speech is cut short, so stale end events are ignored. */
+  const speech = useRef({ id: 0, text: "", on: false });
 
   const stopAll = useCallback(() => {
+    speech.current = { id: speech.current.id + 1, text: "", on: false };
     window.speechSynthesis?.cancel();
-    recog.current?.abort();
-    recog.current = null;
+    const e = ear.current;
+    ear.current = null;
+    if (e) {
+      clearTimeout(e.timer);
+      e.r.abort();
+    }
   }, []);
 
   useEffect(() => () => {
@@ -108,6 +152,9 @@ export default function BrowserTalk({
       setLines((l) => [...l, { role: "assistant", text }]);
       setPhase("speaking");
 
+      const id = speech.current.id + 1;
+      speech.current = { id, text, on: true };
+
       const parts = sentences(text);
       const bcp = BCP47[lang.current] ?? "hi-IN";
       const voice = voiceFor(bcp);
@@ -119,13 +166,17 @@ export default function BrowserTalk({
         u.rate = 0.95;
         if (i === parts.length - 1) {
           u.onend = () => {
-            if (!active.current) return;
+            if (!active.current || speech.current.id !== id) return;
+            speech.current.on = false;
             if (end) finish();
-            else listen();
+            else hearAnswer();
           };
         }
         window.speechSynthesis.speak(u);
       });
+
+      // A goodbye is not interrupted; anything else can be talked over.
+      if (!end) startEar("watch");
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [finish],
@@ -159,33 +210,81 @@ export default function BrowserTalk({
     [getTicket, say, finish],
   );
 
-  function listen() {
+  /** Listening for an answer, ending the turn after a stretch of quiet. */
+  function toListen(e: Ear, from: number) {
+    e.mode = "listen";
+    e.from = from;
+    setHeard("");
+    setPhase("listening");
+    armSilence(e);
+  }
+
+  function armSilence(e: Ear) {
+    clearTimeout(e.timer);
+    e.timer = setTimeout(() => e.r.stop(), SILENCE_MS);
+  }
+
+  /** The assistant has finished (or been stopped by the button): take the answer. */
+  function hearAnswer() {
+    const e = ear.current;
+    // Everything the watch heard so far was the assistant itself.
+    if (e) toListen(e, e.count);
+    else startEar("listen");
+  }
+
+  /** Talked over: stop speaking at once and keep what was said. */
+  function bargeIn(e: Ear) {
+    speech.current = { id: speech.current.id + 1, text: "", on: false };
+    window.speechSynthesis.cancel();
+    toListen(e, e.from);
+  }
+
+  function startEar(mode: Ear["mode"]) {
     const R = recognitionClass();
-    if (!R || !active.current) return;
+    if (!R || !active.current || ear.current) return;
 
     const r = new R();
     r.lang = BCP47[lang.current] ?? "hi-IN";
     r.interimResults = true;
-    r.continuous = false;
+    // Continuous so one session spans the assistant speaking and the answer;
+    // the turn ends on the first final result or on SILENCE_MS of quiet.
+    r.continuous = true;
     r.maxAlternatives = 1;
-    recog.current = r;
 
-    let final = "";
-    setHeard("");
-    setPhase("listening");
+    const e: Ear = { r, mode, from: 0, count: 0, final: "", interim: "", startedAt: Date.now() };
+    ear.current = e;
+    if (mode === "listen") toListen(e, 0);
 
-    r.onresult = (e) => {
+    r.onresult = (ev) => {
+      if (ear.current !== e) return;
+      e.count = ev.results.length;
+
+      let final = "";
       let interim = "";
-      for (let i = 0; i < e.results.length; i++) {
-        const res = e.results[i];
-        if (res.isFinal) final += res[0].transcript;
+      for (let i = e.from; i < ev.results.length; i++) {
+        const res = ev.results[i];
+        if (res.isFinal) final += res[0].transcript + " ";
         else interim += res[0].transcript;
       }
-      setHeard(final || interim);
+
+      if (e.mode === "watch") {
+        if (!talkingOver(final + interim, speech.current.text, Boolean(final.trim()))) {
+          // The assistant's own voice, finalised: skip past it.
+          if (final.trim()) e.from = ev.results.length;
+          return;
+        }
+        bargeIn(e);
+      }
+
+      e.final = final.trim();
+      e.interim = interim.trim();
+      setHeard(e.final || e.interim);
+      armSilence(e);
+      if (e.final) r.stop();
     };
 
-    r.onerror = (e) => {
-      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+    r.onerror = (ev) => {
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
         setError("माइक की अनुमति चाहिए। ब्राउज़र में माइक 'Allow' करें।");
         finish();
       }
@@ -193,10 +292,20 @@ export default function BrowserTalk({
     };
 
     r.onend = () => {
-      recog.current = null;
+      if (ear.current !== e) return;
+      clearTimeout(e.timer);
+      ear.current = null;
       if (!active.current) return;
 
-      const text = final.trim();
+      if (e.mode === "watch") {
+        // The browser closed the session while the assistant was still talking
+        // (a long reply, a network blip): watch again, unless it is failing
+        // outright, in which case the button still interrupts.
+        if (speech.current.on && Date.now() - e.startedAt > 1000) startEar("watch");
+        return;
+      }
+
+      const text = (e.final || e.interim).trim();
       if (text) {
         silent.current = 0;
         setHeard("");
@@ -235,8 +344,9 @@ export default function BrowserTalk({
   function press() {
     if (phase === "idle" || phase === "ended") return void start();
     if (phase === "speaking") {
+      speech.current = { id: speech.current.id + 1, text: "", on: false };
       window.speechSynthesis.cancel();
-      listen();
+      hearAnswer();
       return;
     }
     finish();

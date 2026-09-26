@@ -9,7 +9,7 @@ import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { getDistrict } from "../../../lib/livelihood/catalog";
 import type { ConsultantRecord, ConsultantScore } from "../../../lib/store/consultants";
-import { DistrictPicker, ErrorNote, PageTitle, useDistrict, useJson } from "../../components/ks/admin";
+import { DistrictPicker, ErrorNote, PageTitle, TableRowsSkeleton, useDistrict, useJson } from "../../components/ks/admin";
 import { useStaff } from "../../components/ks/StaffShell";
 import { api, Button, Card } from "../../components/ks/ui";
 
@@ -19,7 +19,7 @@ export default function ConsultantsPage() {
   const user = useStaff();
   const officer = ["ministry", "state", "district"].includes(user?.role ?? "");
   const [district, setDistrict, options] = useDistrict();
-  const { data, error, reload } = useJson<{ consultants: Row[] }>(`/api/consultants${district ? `?district=${district}` : ""}`);
+  const { data, error, reload, loading } = useJson<{ consultants: Row[] }>(`/api/consultants${district ? `?district=${district}` : ""}`);
   const [form, setForm] = useState({ name: "", phone: "", blocks: "", specialisations: "dpr, mudra", capacity: "20", district: "" });
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -50,7 +50,7 @@ export default function ConsultantsPage() {
 
   return (
     <div className="space-y-5">
-      <PageTitle title="Financial consultants" sub="Only verified consultants with free capacity are matched to new self-employment cases." right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
+      <PageTitle title="Financial consultants" sub="Only verified consultants with free capacity are matched to new self-employment cases." loading={loading} right={<DistrictPicker value={district} onChange={setDistrict} options={options} />} />
       <ErrorNote error={error} />
 
       <Card className="overflow-x-auto p-0 sm:p-0">
@@ -61,7 +61,11 @@ export default function ConsultantsPage() {
               <th>Cases</th><th>Loans sanctioned / rejected</th><th>Running</th><th>Score</th><th>Verified</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className={`transition-opacity ${data && loading ? "opacity-50" : ""}`}>
+            {!data && loading && <TableRowsSkeleton cols={9} rows={5} />}
+            {data && data.consultants.length === 0 && (
+              <tr><td colSpan={9} className="px-3 py-8 text-center text-xs text-[var(--text-muted)]">No consultants registered yet.</td></tr>
+            )}
             {(data?.consultants ?? []).map((c) => (
               <tr key={c.id} className="border-b border-[var(--border)]">
                 <td className="px-3 py-2 font-medium">{c.name}{c.sample && <span className="text-xs text-[var(--text-subtle)]"> (sample)</span>}</td>
