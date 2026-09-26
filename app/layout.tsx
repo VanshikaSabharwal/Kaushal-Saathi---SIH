@@ -2,11 +2,16 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import "./globals.css";
 import AppShell from "./components/AppShell";
+import ServiceWorker from "./components/ServiceWorker";
 import { TRANSLATE_BOOT_SCRIPT } from "./lib/shells";
 
+// Only the Devanagari font is preloaded: beneficiary screens (the ones used on
+// 2G/3G) never render Geist, and a preloaded font downloads whether or not the
+// page uses it. Staff screens fetch Geist on first use instead.
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  preload: false,
 });
 
 const deva = Noto_Sans_Devanagari({
@@ -18,6 +23,7 @@ const deva = Noto_Sans_Devanagari({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -41,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full">
         <AppShell>{children}</AppShell>
+        <ServiceWorker />
       </body>
     </html>
   );
