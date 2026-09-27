@@ -22,8 +22,16 @@
  */
 
 import { createHash } from "node:crypto";
+import STATIC from "../../data/i18n/static.json";
 import { createCollection } from "../store/collection";
 import { LANGUAGE_CODES, languageOf } from "./languages";
+
+/**
+ * Translations shipped with the app ("hi>en" -> source text -> translation),
+ * exported from the paid cache by `npm run i18n:export`. Checked first, so a
+ * sentence is paid for once, ever — not once per database or deployment.
+ */
+const SHIPPED = STATIC as Record<string, Record<string, string>>;
 
 type Cached = { id: string; lang: string; text: string; translated: string; provider: string; at: number };
 
@@ -355,6 +363,13 @@ export async function translate(texts: string[], target: string, source = "hi"):
         result[i] = text;
         return;
       }
+      const shipped = SHIPPED[`${source}>${target}`]?.[text];
+      if (shipped) {
+        result[i] = shipped;
+        cached++;
+        return;
+      }
+
       const id = keyOf(target, source, text);
       let hit = memory.get(id);
       if (!hit) {

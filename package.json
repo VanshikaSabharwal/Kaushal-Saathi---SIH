@@ -24,6 +24,7 @@
     "verify:services": "tsx scripts/verify-services.ts",
     "ingest:regions": "tsx scripts/ingest-regions.ts",
     "extract:opportunities": "tsx scripts/extract-opportunities.ts",
+    "i18n:export": "tsx scripts/export-translations.ts",
     "seed:users": "tsx scripts/seed-users.ts",
     "eval:personas": "tsx scripts/eval-personas.ts"
   },

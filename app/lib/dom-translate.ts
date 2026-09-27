@@ -27,6 +27,11 @@
  *
  * Anything inside [translate="no"] is left alone: phone numbers, OTP codes,
  * the language picker itself.
+ *
+ * Staff screens (written in English) are offered in Hindi only, from a
+ * dictionary shipped with the app (data/i18n/staff-hi.json): no service call,
+ * no skeleton, no background prefetch. Text the dictionary lacks — names, data
+ * — stays in English.
  */
 
 import { PREFETCH_FRAME, sourceForPath } from "./shells";
@@ -114,6 +119,15 @@ function chunks<T>(list: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
   return out;
+}
+
+/** Sources translated only from a shipped dictionary, and the languages each offers. */
+export const STATIC_LANGUAGES: Record<string, string[]> = { en: ["en", "hi"] };
+
+/** The shipped dictionary for a static source, loaded on first use so other screens never download it. */
+async function loadStatic(source: string, lang: string): Promise<Record<string, string>> {
+  if (source === "en" && lang === "hi") return (await import("../../data/i18n/staff-hi.json")).default;
+  return {};
 }
 
 /** Linked pages already translated in the background, as "lang path" — shared, so each is fetched once per visit. */
@@ -225,6 +239,17 @@ export class DomTranslator {
       return;
     }
 
+    if (this.isStatic) {
+      const cache = cacheFor(this.source, lang);
+      for (const [k, v] of Object.entries(await loadStatic(this.source, lang))) cache.set(k, v);
+      if (this.target !== lang) return;
+      this.collect();
+      this.apply(lang);
+      liftBootSkeleton();
+      this.setPhase("idle");
+      return;
+    }
+
     this.waitUntil = performance.now() + WAIT_WINDOW_MS;
     this.applyKnown();
     this.startObserving();
@@ -233,7 +258,11 @@ export class DomTranslator {
 
   /** A new page was navigated to: its new text is awaited, so it shows as a skeleton until translated. */
   pageChanged(): void {
-    if (this.target !== this.source) this.waitUntil = performance.now() + WAIT_WINDOW_MS;
+    if (this.target !== this.source && !this.isStatic) this.waitUntil = performance.now() + WAIT_WINDOW_MS;
+  }
+
+  private get isStatic(): boolean {
+    return this.source in STATIC_LANGUAGES;
   }
 
   dispose(): void {
@@ -332,6 +361,12 @@ export class DomTranslator {
   }
 
   private async run(): Promise<void> {
+    // The dictionary is all there is: write what it knows, fetch nothing.
+    if (this.isStatic) {
+      this.collect();
+      this.apply(this.target);
+      return;
+    }
     if (this.running) {
       this.schedule();
       return;

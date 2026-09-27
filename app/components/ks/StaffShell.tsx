@@ -33,7 +33,6 @@ const NAV: NavItem[] = [
   { href: "/admin/words", label: "Dialect words", roles: [...OFFICERS, "saathi"] },
   { href: "/saathi", label: "Saathi desk", roles: ["saathi", "district"] },
   { href: "/centre", label: "Centre desk", roles: ["centre"] },
-  { href: "/dev/call", label: "Engine tools", roles: ["ministry"] },
 ];
 
 const ROLE_LABEL: Record<StaffSession["role"], string> = {

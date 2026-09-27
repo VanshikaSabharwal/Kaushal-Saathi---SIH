@@ -13,7 +13,7 @@
 
 import { decodeMulaw, FRAME_MS } from "../audio/mulaw";
 import { FrameRing, PlaybackQueue } from "../audio/frames";
-import { BargeInDetector, Vad } from "../audio/vad";
+import { BargeInDetector, EchoGate, Vad } from "../audio/vad";
 import { callParamsFrom, type CallParams } from "./params";
 import { createTranscriber, type Transcriber } from "../agent/transcriber";
 import { runAgent } from "../agent/llm";
@@ -215,6 +215,8 @@ export class CallSession {
 
   private readonly vad: Vad;
   private readonly bargeIn: BargeInDetector;
+  /** Tells the agent's own voice, coming back through the caller's speaker, from the caller talking over it. */
+  private readonly echo = new EchoGate();
   private readonly preRoll: FrameRing;
   private readonly playback: PlaybackQueue;
 
@@ -278,7 +280,10 @@ export class CallSession {
     this.preRoll = new FrameRing(this.params.vad.onsetFrames);
 
     this.playback = new PlaybackQueue(
-      (frame) => this.transport.sendAudio(frame),
+      (frame) => {
+        this.echo.played(decodeMulaw(frame));
+        this.transport.sendAudio(frame);
+      },
       (name) => this.onMarkReached(name),
     );
 
@@ -472,8 +477,12 @@ export class CallSession {
     if (Date.now() - this.speakingSince < BARGE_IN_GUARD_MS) return;
 
     // The raw noise floor, not vad.threshold: the detector applies its own
-    // ratio, and passing an already-scaled threshold applied it twice.
-    if (!this.bargeIn.push(pcm, this.vad.floor)) return;
+    // ratio, and passing an already-scaled threshold applied it twice. The
+    // echo level is checked before it learns from this frame, so a caller who
+    // starts talking is compared against the room, not against themselves.
+    const echo = this.echo.expected();
+    this.echo.heard(pcm);
+    if (!this.bargeIn.push(pcm, this.vad.floor, echo)) return;
 
     this.interrupt();
 
@@ -504,6 +513,7 @@ export class CallSession {
 
     this.bargeIn.reset();
     this.vad.reset();
+    this.echo.silence();
 
     // Record only what the caller actually heard. Storing the full reply would
     // leave the model believing it said something the caller never received,
@@ -824,6 +834,7 @@ export class CallSession {
     this.preRoll.clear();
     this.vad.reset();
     this.bargeIn.reset();
+    this.echo.silence();
   }
 
   // -------------------------------------------------------------------------

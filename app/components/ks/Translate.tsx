@@ -12,7 +12,7 @@ import { createContext, useContext, useLayoutEffect, useRef, useState, useSyncEx
 import { usePathname } from "next/navigation";
 import { FiGlobe, FiLoader, FiMic, FiX } from "react-icons/fi";
 import { LANGUAGES, languageOf, type UiLanguage } from "../../../lib/i18n/languages";
-import { DomTranslator, type TranslatePhase } from "../../lib/dom-translate";
+import { DomTranslator, STATIC_LANGUAGES, type TranslatePhase } from "../../lib/dom-translate";
 import { PREFETCH_FRAME } from "../../lib/shells";
 
 const KEY = "ks_lang";
@@ -61,7 +61,9 @@ export function useTranslation(): TranslateState | null {
 export function TranslateProvider({ source, children }: { source: "hi" | "en"; children: React.ReactNode }) {
   // "" on the server and before a choice: show the source language.
   const chosen = useSyncExternalStore(subscribe, readChoice, () => "");
-  const lang = languageOf(chosen || source);
+  // Staff screens offer only their dictionary's languages; any other choice (made on a beneficiary screen) shows the source.
+  const offered = STATIC_LANGUAGES[source];
+  const lang = languageOf(chosen && (!offered || offered.includes(chosen)) ? chosen : source);
 
   const root = useRef<HTMLDivElement | null>(null);
   const translator = useRef<DomTranslator | null>(null);
@@ -147,7 +149,7 @@ export function LanguagePicker({ tone = "light" }: { tone?: "light" | "dark" }) 
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {LANGUAGES.map((l) => (
+              {LANGUAGES.filter((l) => !STATIC_LANGUAGES[t.source] || STATIC_LANGUAGES[t.source].includes(l.code)).map((l) => (
                 <button
                   key={l.code}
                   dir={l.rtl ? "rtl" : "ltr"}
@@ -168,10 +170,12 @@ export function LanguagePicker({ tone = "light" }: { tone?: "light" | "dark" }) 
               ))}
             </div>
 
-            <p className="mt-3 text-xs text-[var(--text-muted)]">
-              Pages are machine-translated and may contain mistakes. The microphone mark means the voice assistant speaks
-              this language; in the others, use the written chat (सहायता).
-            </p>
+            {!STATIC_LANGUAGES[t.source] && (
+              <p className="mt-3 text-xs text-[var(--text-muted)]">
+                Pages are machine-translated and may contain mistakes. The microphone mark means the voice assistant speaks
+                this language; in the others, use the written chat (सहायता).
+              </p>
+            )}
           </div>
         </div>
       )}

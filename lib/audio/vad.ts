@@ -191,12 +191,16 @@ export class BargeInDetector {
 
   /**
    * @param noiseFloor shared with the main VAD, which learns it during silence
+   * @param echo how loud the agent's own voice is likely to be in this frame
+   *   (EchoGate.expected); the caller must be clearly louder than that. Not
+   *   capped by maxThreshold: a loud speaker is not a noisy room, and letting
+   *   the agent's voice through is exactly how it interrupts itself.
    * @returns true when the caller is talking over the agent
    */
-  push(pcm: Int16Array, noiseFloor: number): boolean {
-    const threshold = Math.min(
-      Math.max(noiseFloor * this.ratio, this.minThreshold),
-      this.maxThreshold,
+  push(pcm: Int16Array, noiseFloor: number, echo = 0): boolean {
+    const threshold = Math.max(
+      Math.min(Math.max(noiseFloor * this.ratio, this.minThreshold), this.maxThreshold),
+      echo,
     );
 
     if (rms(pcm) > threshold) {
@@ -210,5 +214,91 @@ export class BargeInDetector {
 
   reset(): void {
     this.run = 0;
+  }
+}
+
+/**
+ * The agent hearing itself.
+ *
+ * On a speakerphone (a laptop, a phone on the table) the agent's voice comes
+ * back into the microphone, and whatever echo cancellation the device has
+ * leaves some through — often plenty to pass a loudness test. We know what we
+ * played, so we can tell echo from a person: echo is the played audio, delayed
+ * (network + the listener's buffers, well under a second) and scaled by how
+ * much of it the room lets back in. A caller talking over the agent is louder
+ * than that.
+ *
+ * Two readings per frame: `played` for each frame we send, `heard` for each
+ * frame the microphone sends while we are speaking. The coupling (mic level
+ * per unit of played level) is learned from what is heard: mostly echo, since
+ * a real interruption ends the speech within a fraction of a second.
+ */
+export class EchoGate {
+  /** Loudness of the frames we sent recently, one per 20 ms frame. */
+  private readonly recent: Float32Array;
+  private index = 0;
+  /** Mic level per unit of played level. Starts high: deaf before it has learned, not self-interrupting. */
+  private coupling: number;
+
+  constructor(
+    /** How far back echo can arrive: network round trip plus the listener's buffers. */
+    windowFrames = 50,
+    /** A person must be this much louder than the expected echo. */
+    private readonly margin = 1.6,
+    initialCoupling = 1.0,
+    /** Played frames quieter than this cannot produce echo worth gating. */
+    private readonly minPlayed = 0.01,
+    /** Longest likely echo delay: until then, a quiet microphone proves nothing. */
+    private readonly settleFrames = 25,
+  ) {
+    this.recent = new Float32Array(windowFrames);
+    this.coupling = initialCoupling;
+  }
+
+  /** A frame we sent to the caller. */
+  played(pcm: Int16Array): void {
+    this.recent[this.index] = rms(pcm);
+    this.index = (this.index + 1) % this.recent.length;
+  }
+
+  /** The loudest thing we played within the echo window. */
+  private reference(): number {
+    let max = 0;
+    for (const v of this.recent) if (v > max) max = v;
+    return max;
+  }
+
+  /** How loud the echo of our own voice could be right now, with the margin applied. */
+  expected(): number {
+    const ref = this.reference();
+    return ref < this.minPlayed ? 0 : ref * this.coupling * this.margin;
+  }
+
+  /**
+   * A microphone frame heard while we were speaking: learns the coupling.
+   *
+   * Only lowered once the echo has had time to arrive: the first moments of
+   * each stretch of speech are quiet at the microphone because the sound is
+   * still on its way, not because the room is quiet — learning from them
+   * would drop the guard just before the echo lands.
+   */
+  heard(pcm: Int16Array): void {
+    const ref = this.reference();
+    if (ref < this.minPlayed) return;
+    this.stretch++;
+    const ratio = Math.min(2, rms(pcm) / ref);
+    const falling = ratio < this.coupling;
+    if (falling && this.stretch < this.settleFrames) return;
+    // Rising slowly, so a caller talking over us is not quickly learned as echo.
+    this.coupling += (ratio - this.coupling) * (falling ? 0.05 : 0.02);
+  }
+
+  /** Frames heard in the current stretch of our speech. */
+  private stretch = 0;
+
+  /** Nothing is playing any more (interrupted, or the turn ended). The learned coupling is kept: same room, same call. */
+  silence(): void {
+    this.stretch = 0;
+    this.recent.fill(0);
   }
 }

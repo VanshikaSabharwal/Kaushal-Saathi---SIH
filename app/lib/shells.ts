@@ -5,7 +5,7 @@
  */
 
 /** Developer tools keep the original configuration shell (not translated). */
-export const DEV_PREFIXES = ["/dev", "/settings", "/evaluate", "/conversations"];
+export const DEV_PREFIXES = ["/settings", "/evaluate", "/conversations"];
 export const STAFF_PREFIXES = ["/admin", "/saathi", "/centre", "/login"];
 
 /** Staff screens are written in English, beneficiary screens in Hindi; developer tools are not translated. */
@@ -30,5 +30,5 @@ var p=location.pathname,s=${JSON.stringify(STAFF_PREFIXES)},d=${JSON.stringify(D
 function has(l){for(var i=0;i<l.length;i++)if(p.indexOf(l[i])===0)return true;return false}
 var src=has(s)?"en":has(d)?null:"hi";
 var c=localStorage.getItem("ks_lang");
-if(src&&c&&c!==src){var h=document.documentElement;h.setAttribute("data-ks-boot","");setTimeout(function(){h.removeAttribute("data-ks-boot")},8000)}
+if(src&&c&&c!==src&&(src!=="en"||c==="hi")){var h=document.documentElement;h.setAttribute("data-ks-boot","");setTimeout(function(){h.removeAttribute("data-ks-boot")},8000)}
 }catch(e){}})()`;

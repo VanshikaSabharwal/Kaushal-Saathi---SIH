@@ -12,7 +12,6 @@ import { PRESETS, type SavedConfig } from "../lib/presets";
 import { DEFAULT_CONFIG } from "../lib/types";
 
 const NAV = [
-  { href: "/dev/call", label: "Call", Icon: WaveIcon },
   { href: "/evaluate", label: "Evaluate", Icon: ChartIcon },
   { href: "/conversations", label: "Conversations", Icon: ChatIcon },
   { href: "/settings", label: "Settings", Icon: SettingsIcon },

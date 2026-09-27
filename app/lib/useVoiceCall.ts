@@ -5,8 +5,7 @@
  *
  * Speaks the same protocol a phone line will: 8 kHz mu-law in 20 ms frames
  * over the voice server's WebSocket, audio in binary frames, control in text.
- * Shared by the developer harness (/dev/call) and the beneficiary's talk
- * screen (/talk), so the two cannot drift apart.
+ * Used by the beneficiary's talk screen (/talk).
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";

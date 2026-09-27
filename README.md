@@ -23,7 +23,7 @@ Built on the voice agent engine described below. Livelihood code is in
 | District officer / State / Ministry | `/login` → `/admin` | Overview, beneficiaries, detail and timeline, Needs attention, district insights and perspective plan CSV, placement, consultants, dialect words |
 | Saathi (field worker) | `/saathi` | Register someone, hand over the phone for the interview, call-back queue |
 | Training centre | `/centre` | Enrolled → training → certified |
-| Developers | `/dev/call`, `/settings`, `/evaluate`, `/conversations` | The engine tools |
+| Developers | `/settings`, `/evaluate`, `/conversations` | The engine tools |
 
 Every page has a 🌐 language button. Pages are machine-translated (Sarvam
 Translate or Google) and cached per sentence. The lines the voice bot speaks
