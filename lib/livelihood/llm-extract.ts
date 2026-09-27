@@ -44,9 +44,16 @@ function prompt(slot: SlotId, allowed: string[] | "number"): string {
       ? 'a number, e.g. {"value": 8}'
       : `a list chosen ONLY from: ${allowed.join(", ")} — e.g. {"value": ["${allowed[0]}"]}`;
 
+  // A place we do not cover is still an answer, and deserves a different
+  // reply from "I did not understand".
+  const other =
+    slot === "district"
+      ? ` If it clearly names some other place (a city, district, village or state), reply {"value": "other", "place": "<its name in English>"}.`
+      : "";
+
   return (
     `Classify a spoken Hindi/Marathi answer (may be dialect or mis-transcribed). ` +
-    `Field: ${what}. Reply with JSON {"value": ...} where value is ${values}. ` +
+    `Field: ${what}. Reply with JSON {"value": ...} where value is ${values}.${other} ` +
     `If the answer does not clearly say, reply {"value": null}. Never guess.`
   );
 }
@@ -82,6 +89,9 @@ export function groqExtractor(): LlmExtractor | undefined {
 
     try {
       const parsed = JSON.parse(data.choices?.[0]?.message?.content ?? "{}");
+      if (slot === "district" && parsed.value === "other") {
+        return { outsidePlace: typeof parsed.place === "string" ? parsed.place.trim() : "" };
+      }
       return slotValueFrom(slot, parsed.value);
     } catch {
       return undefined;

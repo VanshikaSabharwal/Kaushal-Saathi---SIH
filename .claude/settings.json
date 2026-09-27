@@ -130,7 +130,11 @@
       "Bash(sed -i '/{ href: \"\\\\/dev\\\\/call\", label: \"Call\", Icon: WaveIcon },/d' app/components/Sidebar.tsx)",
       "Bash(sed -i '/^ \"Engine tools\": \"इंजन टूल\",$/d' data/i18n/staff-hi.json)",
       "Bash(sed -i 's#| Developers | `/dev/call`, `/settings`#| Developers | `/settings`#' README.md)",
-      "Bash(sed -i 'N;s# \\\\* Used by the beneficiary.s talk\\\\n \\\\* screen \\(/talk\\).# * Used by the beneficiary'\"'\"'s talk screen \\(/talk\\).#;P;D' app/lib/useVoiceCall.ts)"
+      "Bash(sed -i 'N;s# \\\\* Used by the beneficiary.s talk\\\\n \\\\* screen \\(/talk\\).# * Used by the beneficiary'\"'\"'s talk screen \\(/talk\\).#;P;D' app/lib/useVoiceCall.ts)",
+      "Bash(cd /home/vanshika/internings 2>/dev/null; cd /home/vanshika/internships/sih && sed -n 560,720p lib/call/session.ts; wc -l lib/agent/stt.ts lib/agent/transcriber.ts)",
+      "Read(//home/vanshika/**)",
+      "Bash(mv /tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/calls.ts /tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/calls.mts)",
+      "Bash(cd /home/vanshika/internings 2>/dev/null; cd /home/vanshika/internships/sih && grep -rn \"ज़िले\\\\|जिले\\\\|Jhansi, Gaya\\\\|झांसी, गया\" --exclude-dir=node_modules --exclude-dir=.next --include=*.ts --include=*.tsx --include=*.json --include=*.md . | grep -v \"data/i18n/staff-hi\\\\|data/i18n/static\" | head -20)"
     ],
     "additionalDirectories": [
       "/home/vanshika/Downloads/",

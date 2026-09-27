@@ -230,14 +230,32 @@ export class BargeInDetector {
  *
  * Two readings per frame: `played` for each frame we send, `heard` for each
  * frame the microphone sends while we are speaking. The coupling (mic level
- * per unit of played level) is learned from what is heard: mostly echo, since
- * a real interruption ends the speech within a fraction of a second.
+ * per unit of played level) is taken from the last second of settled frames,
+ * at a high percentile so echo peaks are covered. A caller who starts talking
+ * is compared against that window, which is still mostly echo, and clears it
+ * well within the 120 ms barge-in needs.
+ *
+ * It must never learn the caller as echo. The previous version averaged every
+ * frame into the coupling, so a caller talking in the first second of a reply
+ * (before the echo had settled) set the coupling to their own level, and with
+ * the margin on top they could never be loud enough to interrupt again.
  */
 export class EchoGate {
   /** Loudness of the frames we sent recently, one per 20 ms frame. */
   private readonly recent: Float32Array;
   private index = 0;
-  /** Mic level per unit of played level. Starts high: deaf before it has learned, not self-interrupting. */
+  /** Mic/played ratios of recent settled frames, newest overwriting oldest. */
+  private readonly ratios: Float32Array;
+  private ratioIndex = 0;
+  private ratioCount = 0;
+  /** Frames heard in the current stretch of our speech. */
+  private stretch = 0;
+  /**
+   * Mic level per unit of played level. Starts where browser and phone echo
+   * cancellation typically leave it; high enough that a hot speakerphone
+   * rarely interrupts itself, low enough that ordinary speech still gets
+   * through before anything has been learned.
+   */
   private coupling: number;
 
   constructor(
@@ -245,13 +263,24 @@ export class EchoGate {
     windowFrames = 50,
     /** A person must be this much louder than the expected echo. */
     private readonly margin = 1.6,
-    initialCoupling = 1.0,
+    initialCoupling = 0.3,
     /** Played frames quieter than this cannot produce echo worth gating. */
     private readonly minPlayed = 0.01,
     /** Longest likely echo delay: until then, a quiet microphone proves nothing. */
     private readonly settleFrames = 25,
+    /** Settled frames needed before the learned coupling replaces the previous one. */
+    private readonly minSamples = 15,
+    /** Which ratio in the window counts as the echo level: high, to cover its peaks. */
+    private readonly percentile = 0.8,
+    /**
+     * Most the coupling may grow per frame (3% ≈ doubling in half a second).
+     * Real echo is there from the first settled frame and is learned quickly;
+     * a caller trying to get a word in is caught long before they are learned.
+     */
+    private readonly maxRise = 1.03,
   ) {
     this.recent = new Float32Array(windowFrames);
+    this.ratios = new Float32Array(windowFrames);
     this.coupling = initialCoupling;
   }
 
@@ -277,28 +306,30 @@ export class EchoGate {
   /**
    * A microphone frame heard while we were speaking: learns the coupling.
    *
-   * Only lowered once the echo has had time to arrive: the first moments of
-   * each stretch of speech are quiet at the microphone because the sound is
-   * still on its way, not because the room is quiet — learning from them
-   * would drop the guard just before the echo lands.
+   * Frames before the echo has had time to arrive are skipped: they are quiet
+   * because the sound is still on its way, not because the room is quiet.
+   * Call after `expected()`, so a frame is never judged against itself.
    */
   heard(pcm: Int16Array): void {
     const ref = this.reference();
     if (ref < this.minPlayed) return;
-    this.stretch++;
-    const ratio = Math.min(2, rms(pcm) / ref);
-    const falling = ratio < this.coupling;
-    if (falling && this.stretch < this.settleFrames) return;
-    // Rising slowly, so a caller talking over us is not quickly learned as echo.
-    this.coupling += (ratio - this.coupling) * (falling ? 0.05 : 0.02);
-  }
+    if (++this.stretch < this.settleFrames) return;
 
-  /** Frames heard in the current stretch of our speech. */
-  private stretch = 0;
+    this.ratios[this.ratioIndex] = Math.min(1, rms(pcm) / ref);
+    this.ratioIndex = (this.ratioIndex + 1) % this.ratios.length;
+    if (this.ratioCount < this.ratios.length) this.ratioCount++;
+    if (this.ratioCount < this.minSamples) return;
+
+    const sorted = Array.from(this.ratios.subarray(0, this.ratioCount)).sort((a, b) => a - b);
+    const learned = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * this.percentile))];
+    this.coupling = Math.min(learned, this.coupling * this.maxRise);
+  }
 
   /** Nothing is playing any more (interrupted, or the turn ended). The learned coupling is kept: same room, same call. */
   silence(): void {
     this.stretch = 0;
+    this.ratioCount = 0;
+    this.ratioIndex = 0;
     this.recent.fill(0);
   }
 }

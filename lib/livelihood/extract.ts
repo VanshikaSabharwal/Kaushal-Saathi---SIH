@@ -41,7 +41,11 @@ export type SlotId =
   | "aspiration";
 
 /** What an answer contributes to the profile. "none" answers are still answers. */
-export type SlotValue = Partial<Profile> & { answeredNone?: boolean };
+export type SlotValue = Partial<Profile> & {
+  answeredNone?: boolean;
+  /** The district answer named a real place outside the districts we cover. */
+  outsidePlace?: string;
+};
 
 const S = synonyms as unknown as {
   yes: string[];

@@ -327,7 +327,7 @@ export function staticLines(language: Profile["language"] = "hi"): string[] {
     t.consentDeclined,
     ...Object.values(t.ask),
     ...Object.values(t.choices),
-    ...["summaryFix", "summaryFixUnclear", "noResults", "resultsAsk", "detailAsk", "noMore", "notInterested", "handoff"].map(
+    ...["summaryFix", "summaryFixUnclear", "noResults", "resultsAsk", "detailAsk", "noMore", "notInterested", "handoff", "outsideArea"].map(
       (k) => line(t, k),
     ),
     // The help desk's and follow-up call's fixed lines.
@@ -579,6 +579,20 @@ async function answerSlot(
   }
 
   let prefix = "";
+
+  // Somewhere we do not cover yet. Say so plainly rather than "I did not
+  // understand"; the answer is logged for staff like any other unknown, and a
+  // second one hands over to a person, who can still help.
+  if (value?.outsidePlace !== undefined) {
+    events.push({ type: "unknown", slot, text });
+
+    if (s.attempts === 0) {
+      s.attempts = 1;
+      return out(line(tOf(s), "outsideArea"));
+    }
+
+    return handoff(`outside the covered districts: ${value.outsidePlace || text}`);
+  }
 
   if (!value) {
     events.push({ type: "unknown", slot, text });
