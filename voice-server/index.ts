@@ -30,6 +30,7 @@ import { getAgentConfig } from "../app/lib/config";
 import { DEFAULT_CONFIG, type AgentConfig } from "../app/lib/types";
 import { PRESETS } from "../app/lib/presets";
 import { ConversationResponder } from "../lib/livelihood/responder";
+import { asLanguage } from "../lib/livelihood/types";
 import { groqExtractor } from "../lib/livelihood/llm-extract";
 import { groqAnswerer } from "../lib/livelihood/answer";
 import { openConversation } from "../lib/store/conversations";
@@ -270,7 +271,9 @@ async function handleCall(ws: WebSocket, url: URL): Promise<void> {
       phone: pending?.to,
       beneficiaryId: pending?.beneficiaryId ?? (ticket?.kind === "call" ? ticket.beneficiaryId : undefined),
       purpose: pending?.purpose,
-      language: config.language === "mr" ? "mr" : "hi",
+      language: asLanguage(config.language) ?? "hi",
+      // The language picked on the website, sent by the browser as ?lang=.
+      chosenLanguage: asLanguage(url.searchParams.get("lang")),
       channelId: id,
       llm: groqExtractor(),
       answer: groqAnswerer(),

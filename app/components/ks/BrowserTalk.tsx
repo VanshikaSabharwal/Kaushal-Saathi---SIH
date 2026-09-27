@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiMic, FiSquare } from "react-icons/fi";
 import { PiHandPalm } from "react-icons/pi";
+import { useTranslation } from "./Translate";
 
 type Phase = "idle" | "speaking" | "listening" | "thinking" | "ended";
 
@@ -52,7 +53,9 @@ const PHASE_HI: Record<Phase, string> = {
   ended: "बात पूरी हुई",
 };
 
-const BCP47: Record<string, string> = { hi: "hi-IN", mr: "mr-IN" };
+const BCP47: Record<string, string> = {
+  hi: "hi-IN", mr: "mr-IN", en: "en-IN", kok: "kok-IN", te: "te-IN", as: "as-IN", bn: "bn-IN",
+};
 const MAX_SILENT_TRIES = 3;
 /** Quiet this long after the assistant stops (or after the last word) ends the turn. */
 const SILENCE_MS = 7000;
@@ -116,7 +119,9 @@ export default function BrowserTalk({
   const [error, setError] = useState<string | null>(null);
 
   const session = useRef<string | null>(null);
-  const lang = useRef("hi");
+  // Starts in the website's language; the server may switch it mid-call.
+  const pageLang = useTranslation()?.lang.code;
+  const lang = useRef(pageLang ?? "hi");
   const ear = useRef<Ear | null>(null);
   const silent = useRef(0);
   const active = useRef(false);
@@ -188,6 +193,7 @@ export default function BrowserTalk({
       const body: Record<string, unknown> = { sessionId: session.current };
       if (text) body.text = text;
       if (!session.current && getTicket) body.ticket = await getTicket();
+      if (!session.current && pageLang) body.language = pageLang;
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -207,7 +213,7 @@ export default function BrowserTalk({
       if (data.language) lang.current = data.language;
       say(data.reply, Boolean(data.end));
     },
-    [getTicket, say, finish],
+    [getTicket, pageLang, say, finish],
   );
 
   /** Listening for an answer, ending the turn after a stretch of quiet. */

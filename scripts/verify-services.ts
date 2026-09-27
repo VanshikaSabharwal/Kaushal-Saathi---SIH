@@ -308,9 +308,8 @@ async function main(): Promise<void> {
     const { LANGUAGES } = await import("../lib/i18n/languages");
     const { translate, setTranslator } = await import("../lib/i18n/translate");
 
-    const scheduled = LANGUAGES.filter((l) => l.code !== "en");
-    check("All 22 Eighth Schedule languages offered", scheduled.length === 22, String(scheduled.length));
-    check("Urdu, Kashmiri, Sindhi right-to-left", LANGUAGES.filter((l) => l.rtl).map((l) => l.code).sort().join() === "ks,sd,ur");
+    const offered = LANGUAGES.map((l) => l.code).sort().join();
+    check("The six project languages offered", offered === "as,bn,en,hi,kok,te", offered);
 
     let calls = 0;
     let seen: string[] = [];
@@ -320,10 +319,10 @@ async function main(): Promise<void> {
       return texts.map((t) => `[${target}] ${t}`);
     });
 
-    const first = await translate(["बात शुरू करें", "मेरी प्रगति"], "ta", "hi");
-    check("Translates into the chosen language", first.translations[0] === "[ta] बात शुरू करें" && first.provider === "stub");
+    const first = await translate(["बात शुरू करें", "मेरी प्रगति"], "te", "hi");
+    check("Translates into the chosen language", first.translations[0] === "[te] बात शुरू करें" && first.provider === "stub");
 
-    const again = await translate(["बात शुरू करें", "सहायता"], "ta", "hi");
+    const again = await translate(["बात शुरू करें", "सहायता"], "te", "hi");
     check("Cached sentences are not paid for twice", calls === 2 && seen.length === 1 && seen[0] === "सहायता" && again.cached === 1, JSON.stringify({ calls, seen }));
     check("Same text, other language, is its own entry", (await translate(["बात शुरू करें"], "bn", "hi")).translations[0] === "[bn] बात शुरू करें");
     check("Source language is returned as is", (await translate(["नमस्ते"], "hi", "hi")).translations[0] === "नमस्ते");
@@ -332,7 +331,7 @@ async function main(): Promise<void> {
     setTranslator("broken", async () => {
       throw new Error("provider down");
     });
-    const down = await translate(["यह नया वाक्य है"], "te", "hi");
+    const down = await translate(["यह नया वाक्य है"], "as", "hi");
     check("Provider down: originals come back, with the reason", down.translations[0] === "यह नया वाक्य है" && down.error === "provider down");
 
     setTranslator("stub", undefined);

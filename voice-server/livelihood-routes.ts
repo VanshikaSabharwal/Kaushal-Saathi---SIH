@@ -23,6 +23,7 @@ import type { Conversation } from "../lib/livelihood/conversation";
 import { allowedValues } from "../lib/livelihood/extract";
 import { setLearned } from "../lib/livelihood/learned";
 import { groqExtractor } from "../lib/livelihood/llm-extract";
+import { asLanguage } from "../lib/livelihood/types";
 import {
   addNote,
   beneficiaries,
@@ -477,7 +478,8 @@ export async function handleLivelihoodRoute(
               : scope.role === "beneficiary"
                 ? scope.beneficiaryId
                 : undefined,
-          language: body.language === "mr" ? "mr" : "hi",
+          language: "hi",
+          chosenLanguage: asLanguage(body.language),
           channelId: `chat-${sessionId}`,
           llm: groqExtractor(),
           answer: groqAnswerer(),

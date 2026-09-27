@@ -128,6 +128,8 @@ export async function openConversation(opts: {
   beneficiaryId?: string;
   purpose?: "followup";
   language?: Profile["language"];
+  /** Picked by the person just now (the website's language) — beats their stored one. */
+  chosenLanguage?: Profile["language"];
   channelId: string;
   llm?: LlmExtractor;
   answer?: Answerer;
@@ -141,10 +143,18 @@ export async function openConversation(opts: {
   const channel = opts.channelId.startsWith("chat-") ? "chat" : "voice";
   const beneficiary = (await startCallFor(seed.id, opts.channelId, seed)) ?? seed;
 
-  const conversation = new Conversation(await openingFor(beneficiary, opts.purpose), {
-    // A person's own language (switched to on an earlier call) beats the
-    // deployment's default.
-    language: existing ? beneficiary.profile.language ?? beneficiary.language : opts.language,
+  const opening = await openingFor(beneficiary, opts.purpose);
+  const chosen = opts.chosenLanguage;
+  if (chosen) {
+    if (opening.mode === "interview" && opening.resume) opening.resume = { ...opening.resume, profile: { ...opening.resume.profile, language: chosen } };
+    if (opening.mode === "helpdesk") opening.ctx = { ...opening.ctx, language: chosen };
+    if (opening.mode === "followup") opening.language = chosen;
+  }
+
+  const conversation = new Conversation(opening, {
+    // The language picked on the website wins; otherwise a person's own
+    // language (switched to on an earlier call) beats the deployment's default.
+    language: chosen ?? (existing ? beneficiary.profile.language ?? beneficiary.language : opts.language),
     llm: opts.llm,
     answer: opts.answer,
     region: opts.region ?? defaultRegionSearch,

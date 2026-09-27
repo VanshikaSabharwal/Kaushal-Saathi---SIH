@@ -7,7 +7,7 @@
  */
 
 import { envVarFor, keyFor } from "../../app/lib/providers/env";
-import { STT_TIMEOUT_MS, describeFailure, withDeadline } from "./deadline";
+import { BODHAN_FALLBACK_MS, STT_TIMEOUT_MS, describeFailure, withDeadline } from "./deadline";
 
 export type TranscribeInput = {
   bytes: Buffer;
@@ -188,8 +188,33 @@ async function transcribeBodhan(input: TranscribeInput, key: string): Promise<st
   return (data.text ?? "").trim();
 }
 
+/**
+ * Bodhan first; if it is slower than BODHAN_FALLBACK_MS or fails, the same
+ * audio goes to Sarvam. Without a Sarvam key this is plain Bodhan.
+ */
+async function bodhanOrSarvam(input: TranscribeInput, key: string): Promise<string> {
+  const sarvamKey = keyFor("sarvam", "stt");
+  if (!sarvamKey) return transcribeBodhan(input, key);
+
+  try {
+    return await transcribeBodhan(
+      { ...input, signal: withDeadline(input.signal, BODHAN_FALLBACK_MS) },
+      key,
+    );
+  } catch (err) {
+    if (input.signal?.aborted) throw err;
+    console.warn(`[stt] Bodhan slow or failed, using Sarvam: ${err instanceof Error ? err.message : err}`);
+    return transcribeSarvam({ ...input, provider: "sarvam", model: "saaras:v3" }, sarvamKey);
+  }
+}
+
 /** Transcribe one utterance. Throws on provider or configuration errors. */
 export async function transcribe(input: TranscribeInput): Promise<string> {
+  // SPEECH_PROVIDER=sarvam reroutes Bodhan speech to Sarvam without editing presets.
+  if (process.env.SPEECH_PROVIDER === "sarvam" && input.provider === "bodhan") {
+    input = { ...input, provider: "sarvam", model: "saaras:v3" };
+  }
+
   const key = keyFor(input.provider, "stt");
 
   if (!key) {
@@ -201,7 +226,7 @@ export async function transcribe(input: TranscribeInput): Promise<string> {
   try {
     if (input.provider === "gemini") return await transcribeGemini(input, key);
     if (input.provider === "sarvam") return await transcribeSarvam(input, key);
-    if (input.provider === "bodhan") return await transcribeBodhan(input, key);
+    if (input.provider === "bodhan") return await bodhanOrSarvam(input, key);
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError" && input.signal?.aborted) {
       throw err;

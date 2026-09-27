@@ -9,6 +9,7 @@
 import { useEffect, useRef } from "react";
 import { FiMic, FiSquare } from "react-icons/fi";
 import { useVoiceCall, type CallState } from "../../lib/useVoiceCall";
+import { useTranslation } from "./Translate";
 
 const STATE_HI: Record<CallState, { text: string; tone: string }> = {
   idle: { text: "बात शुरू करने के लिए बटन दबाइए", tone: "bg-[var(--ks-primary)]" },
@@ -45,6 +46,7 @@ export default function TalkPanel({
   onUseBrowser?: () => void;
 }) {
   const voice = useVoiceCall();
+  const pageLang = useTranslation()?.lang.code;
   const { state, entries, connected, level, speech } = voice;
   const wasConnected = useRef(false);
 
@@ -58,7 +60,7 @@ export default function TalkPanel({
 
   async function start() {
     const ticket = getTicket ? await getTicket() : undefined;
-    await voice.call({ agentId, ticket });
+    await voice.call({ agentId, ticket, lang: pageLang });
   }
 
   const s = STATE_HI[connected ? state : state === "ended" ? "ended" : "idle"];

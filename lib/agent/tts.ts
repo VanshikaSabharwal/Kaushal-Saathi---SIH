@@ -24,7 +24,7 @@ import { encodeMulaw, SAMPLE_RATE } from "../audio/mulaw";
 import { parseWav, resampleLinear } from "../audio/resample";
 import { FrameSplitter } from "../audio/frames";
 import { cartesiaVoiceId, elevenLabsVoiceId } from "./voices";
-import { TTS_TIMEOUT_MS, withDeadline } from "./deadline";
+import { BODHAN_FALLBACK_MS, TTS_TIMEOUT_MS, withDeadline } from "./deadline";
 import * as cache from "./tts-cache";
 import { cacheKey } from "./tts-cache";
 
@@ -249,6 +249,35 @@ async function* bodhan(
   yield encodeMulaw(resampleLinear(pcm, sampleRate, SAMPLE_RATE));
 }
 
+/**
+ * Bodhan first; if it has not returned audio within BODHAN_FALLBACK_MS or
+ * fails, the line is spoken by Sarvam instead. Without a Sarvam key this is
+ * plain Bodhan.
+ */
+async function* bodhanOrSarvam(
+  cfg: AgentConfig,
+  text: string,
+  key: string,
+  signal: AbortSignal,
+): AsyncGenerator<Uint8Array> {
+  const sarvamKey = keyFor("sarvam", "tts");
+  if (!sarvamKey) return yield* bodhan(cfg, text, key, signal);
+
+  // Bodhan yields one blob after the whole response, so collecting loses nothing.
+  const chunks: Uint8Array[] = [];
+  try {
+    for await (const c of bodhan(cfg, text, key, withDeadline(signal, BODHAN_FALLBACK_MS))) {
+      chunks.push(c);
+    }
+  } catch (err) {
+    if (signal.aborted) throw err;
+    console.warn(`[tts] Bodhan slow or failed, using Sarvam: ${err instanceof Error ? err.message : err}`);
+    const sarvamCfg = { ...cfg, tts: { ...cfg.tts, provider: "sarvam", model: "bulbul:v3", voice: "priya" } };
+    return yield* sarvam(sarvamCfg, text, sarvamKey, signal);
+  }
+  yield* chunks;
+}
+
 // ---------------------------------------------------------------------------
 // Gemini — raw PCM16 at its own rate, so this path resamples like Sarvam's.
 // ---------------------------------------------------------------------------
@@ -339,6 +368,11 @@ export function speak(
   text: string,
   signal: AbortSignal,
 ): TtsStream {
+  // SPEECH_PROVIDER=sarvam reroutes Bodhan speech to Sarvam without editing presets.
+  if (process.env.SPEECH_PROVIDER === "sarvam" && cfg.tts.provider === "bodhan") {
+    cfg = { ...cfg, tts: { ...cfg.tts, provider: "sarvam", model: "bulbul:v3", voice: "priya" } };
+  }
+
   const provider = cfg.tts.provider;
   const key = keyFor(provider, "tts");
 
@@ -361,7 +395,7 @@ export function speak(
         : provider === "gemini"
           ? gemini(cfg, text, key, signal)
           : provider === "bodhan"
-            ? bodhan(cfg, text, key, signal)
+            ? bodhanOrSarvam(cfg, text, key, signal)
             : elevenLabs(cfg, text, key, signal);
 
   return collecting(cacheId, text, frameStream(source));

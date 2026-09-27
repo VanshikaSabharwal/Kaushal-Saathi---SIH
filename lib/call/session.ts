@@ -20,6 +20,8 @@ import { runAgent } from "../agent/llm";
 import { speak } from "../agent/tts";
 import type { MediaTransport, CallDirection } from "./transport";
 import type { AgentConfig, ChatTurn } from "../../app/lib/types";
+import { line, tpl } from "../livelihood/i18n";
+import { asLanguage } from "../livelihood/types";
 
 export type CallState =
   | "idle"
@@ -191,16 +193,9 @@ export function defaultGreetingFor(
  * call's language, for the same reason as the greeting.
  */
 function silentGoodbyeFor(cfg: AgentConfig): string {
-  switch ((cfg.language || "en").split("-")[0]) {
-    case "hi":
-      return "मुझे कुछ सुनाई नहीं दिया, इसलिए अभी कॉल बंद कर रही हूँ। जब आप तैयार हों, दोबारा बात कर लीजिए।";
-
-    case "mr":
-      return "मला काही ऐकू आलं नाही, म्हणून आता कॉल बंद करते. तुम्ही तयार असाल तेव्हा पुन्हा बोला.";
-
-    default:
-      return "I could not hear anything, so I will end the call now. Please call back when you are ready.";
-  }
+  const lang = asLanguage(cfg.language);
+  if (lang && lang !== "en") return line(tpl(lang), "silentGoodbye");
+  return "I could not hear anything, so I will end the call now. Please call back when you are ready.";
 }
 
 export class CallSession {
@@ -401,7 +396,7 @@ export class CallSession {
         // an agent talking to itself forever ties up a channel and bills for
         // TTS nobody hears.
         if (this.reprompts > MAX_REPROMPTS) {
-          void this.sayThenHangup(silentGoodbyeFor(this.cfg));
+          void this.sayThenHangup(silentGoodbyeFor(this.speechConfig()));
           return;
         }
 

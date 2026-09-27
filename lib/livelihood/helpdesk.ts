@@ -19,7 +19,7 @@ import { intentOf, yesNo } from "./extract";
 import { guardReply, type Facts } from "./guard";
 import { durationText, fill, line as tline, tpl } from "./i18n";
 import { bestKey, hasAny, numbersIn, tokens } from "./text";
-import type { Centre, Consultant, Course } from "./types";
+import type { Centre, Consultant, Course, Language } from "./types";
 
 export type TicketCategory = "stipend" | "centre" | "travel" | "course" | "general" | "question";
 export type ProgressKind = "training" | "month" | "certified" | "placed" | "self_employed" | "dropped";
@@ -32,7 +32,7 @@ export type HelpdeskEvent =
 
 export type HelpdeskContext = {
   status: string;
-  language?: "hi" | "mr";
+  language?: Language;
   district?: string;
   courseId?: string;
   centreId?: string;

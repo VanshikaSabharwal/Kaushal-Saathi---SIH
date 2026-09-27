@@ -8,6 +8,7 @@ import synonyms from "../../data/synonyms.json";
 import { intentOf, yesNo } from "./extract";
 import { tpl } from "./i18n";
 import { bestKey, numbersIn, tokens } from "./text";
+import type { Language } from "./types";
 
 export type FollowupEvent =
   | { type: "followup"; working: boolean; kind?: "wage" | "self"; monthlyIncome?: number }
@@ -16,7 +17,7 @@ export type FollowupEvent =
 export type FollowupState = {
   step: "working" | "kind" | "income" | "offer" | "done";
   kind?: "wage" | "self";
-  language?: "hi" | "mr";
+  language?: Language;
   attempts: number;
   lastSay: string;
 };
@@ -27,7 +28,7 @@ const K = (synonyms as unknown as { followup: Record<string, string[]> }).follow
 
 const fill = (t: string, v: Record<string, string> = {}) => t.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? "");
 
-export function startFollowup(courseHi: string, language: "hi" | "mr" = "hi"): FollowupResult {
+export function startFollowup(courseHi: string, language: Language = "hi"): FollowupResult {
   const say = fill(tpl(language).followup.greeting, { course: courseHi });
   return { state: { step: "working", attempts: 0, language, lastSay: say }, say, events: [], end: false };
 }

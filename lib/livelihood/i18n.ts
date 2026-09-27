@@ -10,12 +10,17 @@
  * on their record for next time.
  */
 
+import as from "../../data/i18n/as.json";
+import bn from "../../data/i18n/bn.json";
+import en from "../../data/i18n/en.json";
 import hi from "../../data/i18n/hi.json";
+import kok from "../../data/i18n/kok.json";
 import mr from "../../data/i18n/mr.json";
+import te from "../../data/i18n/te.json";
 import synonyms from "../../data/synonyms.json";
 import { skillLabel, TRADES } from "./catalog";
 import { findPhrase, hasAny, tokens } from "./text";
-import type { Language, Reason, Sector } from "./types";
+import { asLanguage, type Language, type Reason, type Sector } from "./types";
 
 export type Tpl = {
   greeting: string;
@@ -39,10 +44,21 @@ export type Tpl = {
 };
 
 const HI = hi as unknown as Tpl;
-const MR = mr as unknown as Tpl;
+
+// Marathi is hand-written; the rest are machine-translated from Hindi by
+// scripts/translate-voice-lines.ts.
+const TPL: Record<Language, Tpl> = {
+  hi: HI,
+  mr: mr as unknown as Tpl,
+  en: en as unknown as Tpl,
+  kok: kok as unknown as Tpl,
+  te: te as unknown as Tpl,
+  as: as as unknown as Tpl,
+  bn: bn as unknown as Tpl,
+};
 
 export function tpl(lang?: string): Tpl {
-  return lang === "mr" ? MR : HI;
+  return TPL[asLanguage(lang) ?? "hi"];
 }
 
 export function fill(template: string, vars: Record<string, string | number | undefined> = {}): string {
@@ -63,10 +79,10 @@ export function sectorName(s: Sector, t: Tpl): string {
   return t.sectors[s] ?? HI.sectors[s] ?? s;
 }
 
-export function skillName(id: string): string {
-  // Skill labels exist in Hindi only for now; they are close enough in
-  // Devanagari to be understood by Marathi speakers.
-  return skillLabel(id, "hi");
+export function skillName(id: string, lang?: string): string {
+  // Skill labels exist in Hindi and English only; Hindi is the nearer
+  // fallback for the Indian languages.
+  return skillLabel(id, lang === "en" ? "en" : "hi");
 }
 
 export function durationText(days: number, t: Tpl): string {
@@ -84,7 +100,7 @@ export function educationText(n: number | undefined, t: Tpl): string {
 /** A recommendation's reason in the conversation's language. */
 export function reasonText(r: Reason | undefined, t: Tpl, lang?: string): string {
   if (!r) return "";
-  if (lang !== "mr") return r.hi;
+  if (!lang || lang === "hi") return r.hi;
 
   const template = t.reasons?.[r.code];
   if (!template) return r.hi;

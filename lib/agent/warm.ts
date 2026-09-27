@@ -17,6 +17,7 @@ import { cacheKey, has } from "./tts-cache";
 import { defaultGreetingFor } from "../call/session";
 import type { AgentConfig } from "../../app/lib/types";
 import { staticLines } from "../livelihood/interview";
+import { asLanguage } from "../livelihood/types";
 import { activeCount } from "../call/registry";
 
 /** Cap on a warm-up request, kept short so startup is not held up. */
@@ -56,7 +57,7 @@ function linesFor(cfg: AgentConfig): string[] {
   // disk, so this is paid once, not per restart. WARM_ALL_LINES=0 limits it
   // to the greeting.
   if (cfg.mode === "livelihood") {
-    const fixed = staticLines(cfg.language === "mr" ? "mr" : "hi");
+    const fixed = staticLines(asLanguage(cfg.language) ?? "hi");
     lines.push(...(process.env.WARM_ALL_LINES === "0" ? fixed.slice(0, 1) : fixed));
   }
 

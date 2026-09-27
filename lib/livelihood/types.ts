@@ -16,7 +16,15 @@ export type Outcome = "wage" | "self" | "both";
 export type Preference = "wage" | "self" | "either";
 export type Asset = "land" | "livestock" | "shop_space" | "tools" | "savings";
 export type Constraint = "no_heavy_work" | "limited_mobility" | "visual" | "hearing";
-export type Language = "hi" | "mr";
+/** Languages the voice assistant speaks: a data/i18n/<code>.json per entry. */
+export const VOICE_LANGUAGES = ["hi", "mr", "en", "kok", "te", "as", "bn"] as const;
+export type Language = (typeof VOICE_LANGUAGES)[number];
+
+/** A voice language from a loose code ("te", "te-IN"), or undefined. */
+export function asLanguage(code: unknown): Language | undefined {
+  const c = typeof code === "string" ? code.split("-")[0].toLowerCase() : "";
+  return (VOICE_LANGUAGES as readonly string[]).includes(c) ? (c as Language) : undefined;
+}
 
 /**
  * Everything the interview learns about one person.

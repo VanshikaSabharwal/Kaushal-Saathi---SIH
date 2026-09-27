@@ -21,6 +21,12 @@ export const STT_TIMEOUT_MS = 15000;
 /** Time to the first byte of speech, not the whole stream. */
 export const TTS_TIMEOUT_MS = 15000;
 
+/**
+ * How long Bodhan gets before the same request is retried on Sarvam (when a
+ * Sarvam key is set). Override with BODHAN_FALLBACK_MS.
+ */
+export const BODHAN_FALLBACK_MS = Number(process.env.BODHAN_FALLBACK_MS) || 4000;
+
 /** Cancel when either the caller aborts or the deadline passes. */
 export function withDeadline(
   signal: AbortSignal | undefined,

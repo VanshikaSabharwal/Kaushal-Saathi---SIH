@@ -28,6 +28,8 @@ export type CallOptions = {
   agentId?: string | null;
   /** A signed ticket (from /api/me/call-token) to call as a known person. */
   ticket?: string;
+  /** The website's language; the assistant starts the call in it. */
+  lang?: string;
   echoCancellation?: boolean;
 };
 
@@ -107,6 +109,7 @@ export function useVoiceCall() {
       const params = new URLSearchParams();
       if (opts.agentId) params.set("agentId", opts.agentId);
       if (opts.ticket) params.set("ticket", opts.ticket);
+      if (opts.lang) params.set("lang", opts.lang);
 
       const ws = new WebSocket(`${WS_BASE}?${params.toString()}`);
       ws.binaryType = "arraybuffer";

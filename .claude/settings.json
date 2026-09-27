@@ -134,11 +134,44 @@
       "Bash(cd /home/vanshika/internings 2>/dev/null; cd /home/vanshika/internships/sih && sed -n 560,720p lib/call/session.ts; wc -l lib/agent/stt.ts lib/agent/transcriber.ts)",
       "Read(//home/vanshika/**)",
       "Bash(mv /tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/calls.ts /tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/calls.mts)",
-      "Bash(cd /home/vanshika/internings 2>/dev/null; cd /home/vanshika/internships/sih && grep -rn \"ज़िले\\\\|जिले\\\\|Jhansi, Gaya\\\\|झांसी, गया\" --exclude-dir=node_modules --exclude-dir=.next --include=*.ts --include=*.tsx --include=*.json --include=*.md . | grep -v \"data/i18n/staff-hi\\\\|data/i18n/static\" | head -20)"
+      "Bash(cd /home/vanshika/internings 2>/dev/null; cd /home/vanshika/internships/sih && grep -rn \"ज़िले\\\\|जिले\\\\|Jhansi, Gaya\\\\|झांसी, गया\" --exclude-dir=node_modules --exclude-dir=.next --include=*.ts --include=*.tsx --include=*.json --include=*.md . | grep -v \"data/i18n/staff-hi\\\\|data/i18n/static\" | head -20)",
+      "Bash(/usr/bin/python3.12 /home/vanshika/.claude/skills/synced/21ede0b0-0573-4569-b97f-642eb2f597e3_ccd9d972-ad69-4ef8-acc6-56b84f0434b2/docx/scripts/merge_runs.py unpacked/)",
+      "Bash(/usr/bin/python3.12 -)",
+      "Bash(/usr/bin/python3.12 -m venv venv)",
+      "Bash(venv/bin/pip -q install defusedxml lxml)",
+      "Bash(venv/bin/python /home/vanshika/.claude/skills/synced/21ede0b0-0573-4569-b97f-642eb2f597e3_ccd9d972-ad69-4ef8-acc6-56b84f0434b2/docx/scripts/merge_runs.py unpacked/)",
+      "Bash(venv/bin/python /home/vanshika/.claude/skills/synced/21ede0b0-0573-4569-b97f-642eb2f597e3_ccd9d972-ad69-4ef8-acc6-56b84f0434b2/docx/scripts/office/soffice.py --headless --convert-to pdf filled.docx)",
+      "Bash(venv/bin/python /home/vanshika/.claude/skills/synced/21ede0b0-0573-4569-b97f-642eb2f597e3_ccd9d972-ad69-4ef8-acc6-56b84f0434b2/docx/scripts/office/validate.py filled.docx --original orig.docx)",
+      "Bash(awk '{print $2, $3, $4, substr\\($0, index\\($0,$11\\), 150\\)}')",
+      "Bash(break)",
+      "Bash(time timeout 240 npx tsx scripts/fake-caller.ts \"हाँ जी | मैं रतलाम से हूँ | इंदौर\")",
+      "Bash(timeout 120 npx tsx scripts/fake-caller.ts \"हाँ जी\")",
+      "Bash(grep -E \"^tsx$|^ts-node$\")",
+      "Bash(time npx tsx scripts/translate-voice-lines.ts)",
+      "Bash(sed -i 's/^const CONCURRENCY = 6;/const CONCURRENCY = 3;/' scripts/translate-voice-lines.ts)",
+      "Bash(grep -vE \"^[a-z]+: [0-9]+/[0-9]+$\")",
+      "Bash(/usr/bin/python3.12 -c ' *)",
+      "Bash(/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/sihform/venv/bin/pip -q install qrcode[pil] markitdown)",
+      "Bash(/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/sihform/venv/bin/python -)",
+      "Bash(sed -i -E '/code: \"\\(en|kok|te|as|bn\\)\"/ s/ \\\\}\\(,?\\)$/, voice: true }\\\\1/' lib/i18n/languages.ts)",
+      "Bash(W=/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/deck; cp $W/out.pptx ~/Downloads/Kaushal-Saathi-SIH2026-26097-qr.pptx && grep -o '<a:t>[^<]*</a:t>' $W/unpacked/ppt/slides/slide4.xml | head -12 | sed 's/<[^>]*>//g' | tr '\\\\n' '|'; grep -o \"0 LLM calls[^<]*\" $W/unpacked/ppt/slides/slide2.xml)",
+      "Bash(git diff *)",
+      "Bash(sed -i 's/\"রেন্ডো\", //; s/\"রেণ্ডো\", //' lib/livelihood/extract.ts)",
+      "Read(//opt/**)",
+      "Bash(flatpak list *)",
+      "Bash(pdfinfo ~/Downloads/Kaushal-Saathi-SIH2026-26097.pdf)",
+      "Bash(awk '{print $6,$7}')",
+      "Bash(/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/sihform/venv/bin/pip -q install pymupdf)",
+      "Bash(fc-list)",
+      "Bash(/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/sihform/venv/bin/pip -q install opencv-python-headless)",
+      "Bash(/tmp/claude-1000/-home-vanshika-internships-sih/db2bf742-69f2-47c2-9a15-5e753e1a64bd/scratchpad/sihform/venv/bin/python -c ' *)",
+      "Bash(pkill -f \"translate-voice-lines\")",
+      "Bash(grep -o \"कौशल साथी[^\\\\\"]\\\\{0,3\\\\}\" data/i18n/hi.json)"
     ],
     "additionalDirectories": [
       "/home/vanshika/Downloads/",
-      "/tmp"
+      "/tmp",
+      "/home/vanshika/Downloads"
     ]
   }
 }

@@ -31,6 +31,7 @@ import {
   type InterviewState,
 } from "./interview";
 import type { SlotId } from "./extract";
+import { line, tpl } from "./i18n";
 import type { LlmExtractor } from "./llm-extract";
 import type { Profile } from "./types";
 
@@ -59,7 +60,6 @@ export type ConversationDeps = {
 
 export type Reply = { say: string; end: boolean; usedLlm: boolean };
 
-const RESTART_LEAD = "ठीक है, नया रास्ता ढूँढते हैं। ";
 const TICKET_DUE_MS = 48 * 60 * 60 * 1000;
 
 export class Conversation {
@@ -149,7 +149,7 @@ export class Conversation {
         say = say.replace("…", ticketNumber(id));
       } else if (e.type === "restart") {
         // A new course search, in the same call, without asking consent again.
-        const start = startInterview(this.language, { consented: true, lead: this.language === "mr" ? "ठीक आहे, नवीन मार्ग शोधूया. " : RESTART_LEAD });
+        const start = startInterview(this.language, { consented: true, lead: line(tpl(this.language), "restartLead") });
         this.mode = "interview";
         this.interview = start.state;
         say = start.say;

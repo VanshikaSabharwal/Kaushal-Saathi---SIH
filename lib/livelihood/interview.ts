@@ -253,7 +253,7 @@ function resultsLine(shown: Recommendation[], s: InterviewState): string {
 
 function detailLine(r: Recommendation, s: InterviewState): string {
   const t = tOf(s);
-  const label = (ids: string[]) => ids.map((id) => skillName(id)).join(", ");
+  const label = (ids: string[]) => ids.map((id) => skillName(id, s.profile.language)).join(", ");
   const parts = [
     r.skillGap.have.length
       ? line(t, "detail", { course: r.course.nameHi, have: label(r.skillGap.have), need: label(r.skillGap.need) })

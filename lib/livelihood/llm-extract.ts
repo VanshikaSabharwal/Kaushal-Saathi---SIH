@@ -52,7 +52,7 @@ function prompt(slot: SlotId, allowed: string[] | "number"): string {
       : "";
 
   return (
-    `Classify a spoken Hindi/Marathi answer (may be dialect or mis-transcribed). ` +
+    `Classify a spoken answer in Hindi, Marathi, English, Konkani, Telugu, Assamese or Bengali (may be dialect or mis-transcribed). ` +
     `Field: ${what}. Reply with JSON {"value": ...} where value is ${values}.${other} ` +
     `If the answer does not clearly say, reply {"value": null}. Never guess.`
   );
