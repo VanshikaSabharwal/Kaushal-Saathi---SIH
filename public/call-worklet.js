@@ -104,12 +104,19 @@ class PlaybackProcessor extends AudioWorkletProcessor {
     this.step = TARGET_RATE / sampleRate;
     this.frac = 0;
     this.playing = false;
+    // Marks waiting for the audio queued ahead of them to finish playing.
+    this.marks = [];
 
     this.port.onmessage = (event) => {
       const msg = event.data;
 
       if (msg.type === "audio") {
         this.enqueue(msg.samples);
+        return;
+      }
+
+      if (msg.type === "mark") {
+        this.marks.push(msg.name);
         return;
       }
 
@@ -141,6 +148,13 @@ class PlaybackProcessor extends AudioWorkletProcessor {
     return (this.write - this.read + this.buffer.length) % this.buffer.length;
   }
 
+  /** Everything ahead of the pending marks has played: report them. */
+  flushMarks() {
+    if (this.marks.length === 0) return;
+    for (const name of this.marks) this.port.postMessage({ type: "mark", name });
+    this.marks = [];
+  }
+
   process(_inputs, outputs) {
     const out = outputs[0][0];
 
@@ -148,6 +162,7 @@ class PlaybackProcessor extends AudioWorkletProcessor {
 
     if (!this.playing || this.available() < 2) {
       out.fill(0);
+      this.flushMarks();
       return true;
     }
 

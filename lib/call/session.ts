@@ -87,6 +87,23 @@ export type SessionOptions = {
 /** How long after the agent starts speaking before interruption is allowed. */
 const BARGE_IN_GUARD_MS = 200;
 
+/**
+ * Deaf time after the agent's audio has finished playing.
+ *
+ * The last words are still ringing in the room and on their way back up the
+ * line when playback ends; listening at once lets the VAD open a capture on
+ * the agent's own voice, which STT then hands back as something the caller
+ * "said".
+ */
+const ECHO_TAIL_MS = 400;
+
+/**
+ * How long to wait for the far end to confirm a reply has played before
+ * assuming it has. The browser buffers up to 2 s; a carrier that never
+ * echoes marks must not leave the call stuck in "speaking".
+ */
+const MARK_FALLBACK_MS = 2500;
+
 /** How often to report VAD levels upstream. Every frame would be 50/s. */
 const VAD_REPORT_EVERY = 5;
 
@@ -154,6 +171,34 @@ function looksLikeNoise(text: string): boolean {
   if (words.length === 0 || words.length > 3) return false;
 
   return words.every((w) => NOISE_TRANSCRIPTS.has(w));
+}
+
+/** Words for comparing a transcript with what was spoken; spelling variants STT uses are folded together. */
+function normalWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/ँ/g, "ं")
+    .replace(/़/g, "")
+    .replace(/[.,!?;:।॥"'`—-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/**
+ * Is this transcript the agent's own voice, picked up by the caller's mic?
+ *
+ * On a speakerphone whose echo cancellation lets the agent through, STT hands
+ * back the agent's words. A real answer shares a word or two with the
+ * question ("मेरा नाम राम है" after "आपका नाम क्या है?"), so short transcripts
+ * and those with plenty of new words are always believed.
+ */
+function looksLikeEcho(text: string, said: string): boolean {
+  if (!said) return false;
+  const known = new Set(normalWords(said));
+  const heard = normalWords(text);
+  if (heard.length < 3) return false;
+  const repeated = heard.filter((w) => known.has(w)).length;
+  return repeated / heard.length >= 0.75;
 }
 
 /**
@@ -247,6 +292,13 @@ export class CallSession {
    * — otherwise a cough leaves the caller waiting for a line that never comes.
    */
   private resumeText = "";
+  /** The agent's latest line, to recognise it coming back through the caller's mic. */
+  private lastSaid = "";
+  /** Mic frames before this time are the tail of the agent's own voice. */
+  private deafUntil = 0;
+  private markTimer: ReturnType<typeof setTimeout> | null = null;
+  /** The agent's voice has come back as a transcript on this call: no barge-in. */
+  private echoLeaks = false;
   private closed = false;
   private readonly greetingText?: string;
   private readonly responder?: Responder;
@@ -279,15 +331,16 @@ export class CallSession {
         this.echo.played(decodeMulaw(frame));
         this.transport.sendAudio(frame);
       },
-      (name) => this.onMarkReached(name),
+      (name) => this.onMarkSent(name),
     );
 
     this.transport.onAudio((frame) => this.onFrame(frame));
     this.transport.onClose(() => this.end());
 
     // Prefer the transport's own playback report when it has one: Twilio (and
-    // the harness imitating it) knows when audio actually reached the caller's
-    // ear, which our frames-sent estimate can only approximate.
+    // the browser) knows when audio actually reached the caller's ear, which
+    // our frames-sent estimate can only approximate — the far end may still
+    // have seconds buffered when the last frame leaves here.
     this.transport.onMark?.((name) => this.onMarkReached(name));
 
     this.greetingText = opts.greeting;
@@ -359,6 +412,8 @@ export class CallSession {
     }
 
     if (this.state !== "listening" && this.state !== "capturing") return;
+
+    if (Date.now() < this.deafUntil) return;
 
     const reading = this.vad.push(pcm);
 
@@ -460,7 +515,7 @@ export class CallSession {
   // -------------------------------------------------------------------------
 
   private maybeInterrupt(frame: Uint8Array, pcm: Int16Array): void {
-    if (!this.params.interruptionEnabled) return;
+    if (!this.params.interruptionEnabled || this.echoLeaks) return;
 
     // No audio has left yet — TTS is still generating. There is nothing to
     // interrupt, and the caller cannot be reacting to speech they have not
@@ -552,11 +607,26 @@ export class CallSession {
   }
 
   /**
+   * Our paced queue has sent everything up to a mark. The far end may still
+   * be playing it, so ask the transport to report back when it has; only a
+   * transport that cannot report is taken at our word.
+   */
+  private onMarkSent(name: string): void {
+    if (!this.transport.mark || !this.transport.onMark) {
+      this.onMarkReached(name);
+      return;
+    }
+
+    this.transport.mark(name);
+    if (this.markTimer) clearTimeout(this.markTimer);
+    this.markTimer = setTimeout(() => this.onMarkReached(name), MARK_FALLBACK_MS);
+  }
+
+  /**
    * A point in the outgoing audio has finished playing.
    *
-   * Reached twice for the same mark — once from our own paced queue, once
-   * echoed by the transport — so it must be idempotent. Whichever arrives
-   * first hands the turn back; the state check makes the second a no-op.
+   * Reached from the transport's echo or from the fallback timer, so it must
+   * be idempotent: the state check makes the second a no-op.
    */
   private onMarkReached(name: string): void {
     if (!name.startsWith("turn:")) return;
@@ -565,6 +635,9 @@ export class CallSession {
 
     // The reply finished playing without being interrupted.
     if (id !== this.turnId || this.state !== "speaking") return;
+
+    if (this.markTimer) clearTimeout(this.markTimer);
+    this.markTimer = null;
 
     const done = this.pendingTurn;
 
@@ -652,6 +725,17 @@ export class CallSession {
       return;
     }
 
+    /* The agent heard itself: its own words came back through the caller's
+       speaker, either cutting it off or arriving just after it finished.
+       Answering them is the agent talking to itself, so treat it as noise. */
+    if (looksLikeEcho(text, this.lastSaid)) {
+      // This line leaks the agent back to itself; talking over it would only
+      // be the agent interrupting itself again.
+      this.echoLeaks = true;
+      this.resumeOrListen();
+      return;
+    }
+
     // A real reply: whatever was interrupted is no longer owed.
     this.resumeText = "";
 
@@ -724,6 +808,7 @@ export class CallSession {
     // waiting on the provider, leaving the opening words uninterruptible.
     this.speakingSince = 0;
     this.spokenText = text;
+    this.lastSaid = text;
     this.playback.resetCounter();
     this.bargeIn.reset();
 
@@ -824,6 +909,7 @@ export class CallSession {
 
     this.setState("listening");
 
+    this.deafUntil = Date.now() + ECHO_TAIL_MS;
     this.idleFrames = 0;
     this.captureFrames = 0;
     this.preRoll.clear();
@@ -866,6 +952,7 @@ export class CallSession {
     this.closed = true;
     this.turnId++;
 
+    if (this.markTimer) clearTimeout(this.markTimer);
     this.ttsAbort?.abort();
     this.llmAbort?.abort();
     this.transcriber?.cancel();

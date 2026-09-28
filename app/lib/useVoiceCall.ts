@@ -121,6 +121,13 @@ export function useVoiceCall() {
       ctx.createMediaStreamSource(stream).connect(capture);
       playback.connect(ctx.destination);
 
+      // The worklet reports a mark once the audio ahead of it has played out.
+      playback.port.onmessage = (event: MessageEvent<{ type: string; name?: string }>) => {
+        if (event.data.type === "mark" && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "mark", name: event.data.name }));
+        }
+      };
+
       // Mic -> mu-law -> socket.
       capture.port.onmessage = (event: MessageEvent<Int16Array>) => {
         if (ws.readyState === WebSocket.OPEN) ws.send(encodeMulaw(event.data));
@@ -172,8 +179,9 @@ export function useVoiceCall() {
             playback.port.postMessage({ type: "clear" });
             break;
           case "mark":
-            // Echo back once playback reaches it, the way Twilio does.
-            ws.send(JSON.stringify({ type: "mark", name: msg.name }));
+            // Echo back once playback reaches it, the way Twilio does — not on
+            // arrival, or the server listens while our speaker is still talking.
+            playback.port.postMessage({ type: "mark", name: msg.name });
             break;
           case "connected":
             if (msg.beneficiaryId) setBeneficiaryId(msg.beneficiaryId);
